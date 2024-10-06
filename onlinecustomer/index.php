@@ -76,7 +76,7 @@ if (isset($_GET['verification'])) {
 <body class="d-flex align-items-center justify-content-center">
     <div class="login-container bg-white p-4 rounded shadow">
         <div class="start-end"> <img src="win.png" width="80" height="80"></div>
-        <h2 class="text-center mb-3">Hello Again!</h2>
+        <h2 class="text-center mb-3">Hello Agains!</h2>
         <p class="text-center mb-4">Welcome back you've been missed!</p>
         <?php echo $msg; ?>
         <form action="../login.php"  method="POST" id="loginForm">
