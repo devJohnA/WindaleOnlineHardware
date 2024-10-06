@@ -69,15 +69,18 @@ switch ($action) {
 			$useExistingImage = empty($_FILES['image']['name']) && !empty($_POST['existingImage']);
 			
 			if ($useExistingImage) {
+				// Use the existing image
 				$sourceFile = "../stock/upload/" . $_POST['existingImage'];
 				$myfile = $_POST['existingImage'];
 			} else {
+				// Handle new image upload
 				$sourceFile = $_FILES['image']['tmp_name'];
 				$myfile = $_FILES['image']['name'];
 			}
 	
 			$location = "uploaded_photos/" . $myfile;
 	
+			// Copy or move the file to uploaded_photos/
 			if (!copy($sourceFile, $location)) {
 				message("Failed to copy image file!", "error");
 				redirect("index.php?view=add");
@@ -89,58 +92,49 @@ switch ($action) {
 				message("All fields are required!", "error");
 				redirect('index.php?view=add');
 			} else {
+				// Get the product ID
+				$autonumber = New Autonumber();
+				$res = $autonumber->set_autonumber('PROID');
+	
+				// Insert new product data
+				$product = New Product(); 
+				$product->PROID = $res->AUTO;
+				$product->IMAGES = $location;
+				$product->PRODESC = $_POST['PRODESC'];
+				$description = preg_replace('/\r\n|\r|\n/', '<br />', $_POST['Description']);
+				$description = str_replace(array("\r", "\n"), '', $description);
+				$product->Description = $description;
+				$product->CATEGID = $_POST['CATEGORY'];
+				$product->PROQTY = $_POST['PROQTY'];
+				$product->PROPRICE = $_POST['PROPRICE']; 
+				$product->PROSTATS = 'Available';
+				$product->create();
+	
+				// Insert promo data
+				$promo = New Promo();  
+				$promo->PROID = $res->AUTO;  
+				$promo->PRODISPRICE = $_POST['PROPRICE'];     
+				$promo->create();
+	
+				// Update autonumber
+				$autonumber->auto_update('PROID');
+	
 				$productName = $_POST['PRODESC'];
 				$productQty = $_POST['PROQTY'];
 	
-				// Check if there's enough stock
+				// Update stock query
 				$mydb = new Database();
-				$checkStockQuery = "SELECT productStock FROM stocks WHERE productName = '{$productName}'";
-				$mydb->setQuery($checkStockQuery);
-				$result = $mydb->loadSingleResult();
+				$updateStockQuery = "UPDATE stocks SET productStock = productStock - {$productQty} WHERE productName = '{$productName}'";
+				$mydb->setQuery($updateStockQuery);
+				$result = $mydb->executeQuery();
 	
-				if ($result && $result->productStock >= $productQty) {
-					// Proceed with product creation
-					$autonumber = New Autonumber();
-					$res = $autonumber->set_autonumber('PROID');
-	
-					$product = New Product(); 
-					$product->PROID = $res->AUTO;
-					$product->IMAGES = $location;
-					$product->PRODESC = $productName;
-					$description = preg_replace('/\r\n|\r|\n/', '<br />', $_POST['Description']);
-					$description = str_replace(array("\r", "\n"), '', $description);
-					$product->Description = $description;
-					$product->CATEGID = $_POST['CATEGORY'];
-					$product->PROQTY = $productQty;
-					$product->PROPRICE = $_POST['PROPRICE']; 
-					$product->PROSTATS = 'Available';
-					$product->create();
-	
-					$promo = New Promo();  
-					$promo->PROID = $res->AUTO;  
-					$promo->PRODISPRICE = $_POST['PROPRICE'];     
-					$promo->create();
-	
-					$autonumber->auto_update('PROID');
-	
-					// Update stock
-					$updateStockQuery = "UPDATE stocks SET productStock = productStock - {$productQty} WHERE productName = '{$productName}'";
-					$mydb->setQuery($updateStockQuery);
-					$updateResult = $mydb->executeQuery();
-	
-					if ($mydb->affected_rows() > 0) {
-						$_SESSION['success_message'] = "New Product created successfully!";
-					} else {
-						$_SESSION['error_message'] = "Failed to update stock!";
-					}
-	
-					redirect("index.php?view=list");
+				if ($mydb->affected_rows() > 0) {
+					$_SESSION['success_message'] = "New Product created successfully!";
 				} else {
-					// Not enough stock
-					$availableStock = $result ? $result->productStock : 0;
-					$_SESSION['error_message'] = "Stock not enough! Available stock: " . $availableStock;
-					redirect('index.php?view=add');
+					$_SESSION['error_message'] = "Failed to update stock or no such product found!";
 				}
+	
+				redirect("index.php?view=list");
 			}
 		}
 	}
@@ -224,60 +218,68 @@ switch ($action) {
 	
 
 
-	function doDelete() {
-		if (empty($_POST['selector'])) {
-			$_SESSION['error_message'] = "Select the records first before you delete!";
+	function doDelete(){
+
+
+
+ 
+
+ 
+
+
+
+		if (isset($_POST['selector'])==''){
+
+			message("Select the records first before you delete!","error");
+
 			redirect('index.php');
-		} else {
+
+			}else{
+
+
+
 			$id = $_POST['selector'];
+
 			$key = count($id);
-			$deletedCount = 0;
-			$errorMessages = [];
-	
-			for ($i = 0; $i < $key; $i++) {
-				$product = new Product();
-				$currentProduct = $product->single_product($id[$i]);
-	
-				if ($currentProduct) {
-					$productQty = $currentProduct->PROQTY;
-					$productName = $currentProduct->PRODESC;
-	
-					$mydb = new Database();
-					$updateStockQuery = "UPDATE stocks SET productStock = productStock + {$productQty} WHERE productName = '{$productName}'";
-					$mydb->setQuery($updateStockQuery);
-					$result = $mydb->executeQuery();
-	
-					if ($mydb->affected_rows() > 0) {
-						$product->delete($id[$i]);
-	
-						$stockin = new StockIn();
-						$stockin->delete($id[$i]);
-	
-						$promo = new Promo();   
-						$promo->delete($id[$i]);
-	
-						$deletedCount++;
-					} else {
-						$errorMessages[] = "Failed to update stock for product: {$productName}";
-					}
-				} else {
-					$errorMessages[] = "Product not found for ID: {$id[$i]}";
-				}
-			}
-	
-			if ($deletedCount > 0) {
-				$successMessage = "{$deletedCount} product(s) have been deleted and stocks updated.";
-				if (!empty($errorMessages)) {
-					$successMessage .= " However, there were some issues: " . implode(", ", $errorMessages);
-				}
-				$_SESSION['success_message'] = $successMessage;
-			} else {
-				$errorMessage = "No products were deleted. Issues encountered: " . implode(", ", $errorMessages);
-				$_SESSION['error_message'] = $errorMessage;
-			}
-	
+
+
+
+			for($i=0;$i<$key;$i++){ 
+
+
+
+			$product = New Product();
+
+			$product->delete($id[$i]);
+
+ 
+
+
+
+			$stockin = New StockIn();
+
+			$stockin->delete($id[$i]);
+
+
+
+			$promo = New Promo();   
+
+			$promo->delete($id[$i]);
+
+
+
+			message("Product has been Deleted!","info");
+
 			redirect('index.php');
+
+
+
+			}
+
 		}
+
+
+
 	}
 
 	function minusproduct(){

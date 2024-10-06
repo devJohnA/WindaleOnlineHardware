@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function loadChatList() {
     const now = Date.now();
-    if (now - lastChatListUpdate < 5000) return;
+    if (now - lastChatListUpdate < 5000) return; // Prevent updating more than once every 5 seconds
     lastChatListUpdate = now;
 
     fetch('fetchMessages.php')
@@ -434,20 +434,17 @@ function loadChatList() {
             chatList.innerHTML = '';
             data.users.forEach(user => {
                 const listItem = document.createElement('li');
-                listItem.className = 'p-2 border-bottom chat-list-item';
+                listItem.className = 'p-2 border-bottom bg-body-tertiary chat-list-item';
                 listItem.dataset.userId = user.id;
 
-                const isActive = user.id === activeUserId;
-                const hasNewMessage = user.has_new_message; // Assuming your backend provides this flag
-
-                // If active, always text-muted. If not active and has new message, bold.
-                const textClass = isActive ? 'text-muted' : (hasNewMessage ? 'font-weight-bold' : 'text-muted');
+                const isUnread = !isMessageRead(user.id);
+                const textClass = isUnread ? 'font-weight-bold' : 'text-muted';
 
                 listItem.innerHTML = `
                     <div class="d-flex flex-row justify-content-between align-items-center">
                         <div class="pt-1">
                             <p class="${textClass} mb-0">${user.name}</p>
-                            <p class="${textClass} small">${user.message}</p>
+                            <p class="small ${textClass}">${user.message}</p>
                         </div>
                         <div>
                             <span class="delete-icon" data-user-id="${user.id}">
@@ -456,7 +453,7 @@ function loadChatList() {
                         </div>
                     </div>
                     <div class="pt-1">
-                        <p class="${textClass} small mb-1">
+                        <p class="small ${textClass} mb-1">
                             <span class="message-time">${formatTime(user.timestamp)}</span>
                         </p>
                     </div>
@@ -474,11 +471,10 @@ function loadChatList() {
                 const activeItem = chatList.querySelector(`[data-user-id="${activeUserId}"]`);
                 if (activeItem) {
                     activeItem.classList.add('active');
+                    markAsRead(activeUserId);
+                    updateChatItemStyle(activeItem, false);
                 }
             }
-
-            // Update unread message count
-            updateUnreadMessageCount();
         });
 
     scrollChatListToBottom();
@@ -527,64 +523,6 @@ function handleDelete() {
     });
 }
 
-// Function to handle delete action
-// function handleDelete(event) {
-//     event.stopPropagation(); // Prevent triggering the chat item click event
-//     const userId = event.currentTarget.dataset.userId;
-    
-//     // Show confirmation dialog
-//     Swal.fire({
-//         title: 'Are you sure?',
-//         text: "You won't be able to revert this!",
-//         icon: 'warning',
-//         showCancelButton: true,
-//         confirmButtonColor: '#3085d6',
-//         cancelButtonColor: '#d33',
-//         confirmButtonText: 'Yes, delete it!'
-//     }).then((result) => {
-//         if (result.isConfirmed) {
-//             // Send delete request to server
-//             fetch('deleteMessages.php', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/x-www-form-urlencoded',
-//                 },
-//                 body: `user_id=${userId}`
-//             })
-//             .then(response => response.json())
-//             .then(data => {
-//                 if (data.success) {
-//                     Swal.fire(
-//                         'Deleted!',
-//                         'The messages have been deleted.',
-//                         'success'
-//                     );
-//                     // Reload chat list and clear conversation if the deleted user was active
-//                     loadChatList();
-//                     if (activeUserId === userId) {
-//                         document.getElementById('conversation-container').innerHTML = '';
-//                         activeUserId = null;
-//                     }
-//                 } else {
-//                     Swal.fire(
-//                         'Error!',
-//                         'Failed to delete messages: ' + data.message,
-//                         'error'
-//                     );
-//                 }
-//             })
-//             .catch(error => {
-//                 console.error('Error:', error);
-//                 Swal.fire(
-//                     'Error!',
-//                     'An error occurred while deleting messages.',
-//                     'error'
-//                 );
-//             });
-//         }
-//     });
-// }
-
 function isMessageRead(userId) {
     // Implement logic to check if the message has been read
     // This could be based on localStorage, a server-side check, or any other method you prefer
@@ -596,15 +534,10 @@ function markAsRead(userId) {
     localStorage.setItem(`read_${userId}`, 'true');
 }
 
-function updateChatItemStyle(item, hasNewMessage) {
-    const isActive = item.classList.contains('active');
+function updateChatItemStyle(item, isUnread) {
     const textElements = item.querySelectorAll('p');
-    
     textElements.forEach(el => {
-        if (isActive) {
-            el.classList.remove('font-weight-bold');
-            el.classList.add('text-muted');
-        } else if (hasNewMessage) {
+        if (isUnread) {
             el.classList.remove('text-muted');
             el.classList.add('font-weight-bold');
         } else {
@@ -613,36 +546,6 @@ function updateChatItemStyle(item, hasNewMessage) {
         }
     });
 }
-
-
-function updateUnreadMessageCount() {
-    fetch('get_unread_count.php')
-        .then(response => response.json())
-        .then(data => {
-            const unreadCount = data.unread_count;
-            const latestTimestamp = data.latest_timestamp;
-            const badge = document.getElementById('unread-message-count');
-
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount;
-                badge.style.display = 'inline';
-                if (latestTimestamp) {
-                    const formattedTime = new Date(latestTimestamp).toLocaleString();
-                    badge.title = `${unreadCount} customer(s) with unread messages. Latest at ${formattedTime}`;
-                } else {
-                    badge.title = `${unreadCount} customer(s) with unread messages.`;
-                }
-            } else {
-                badge.style.display = 'none';
-            }
-        })
-        .catch(error => {
-            console.error("Error fetching unread message count:", error);
-        });
-}
-
-// Update the chat every 5 seconds and check for unread messages
-
 
 function loadConversation(userId) {
     if (isUpdating) return;
@@ -777,13 +680,6 @@ function sendInitialResponse(userId) {
         });
 }
 
-document.getElementById('message-textarea').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        debouncedSendMessage();
-    }
-});
-
 // Function to send a message
 function sendMessage() {
     if (isSending || activeUserId === null) return;
@@ -834,19 +730,15 @@ function updateChat() {
 document.addEventListener('DOMContentLoaded', () => {
     loadChatList();
 
-   // Modify the click event listener for chat items
-   document.getElementById('chat-list').addEventListener('click', (event) => {
+    document.getElementById('chat-list').addEventListener('click', (event) => {
     const chatItem = event.target.closest('.chat-list-item');
     if (chatItem) {
         const userId = chatItem.dataset.userId;
-        document.querySelectorAll('.chat-list-item').forEach(item => {
-            item.classList.remove('active');
-            updateChatItemStyle(item, item.dataset.hasNewMessage === 'true');
-        });
+        document.querySelectorAll('.chat-list-item').forEach(item => item.classList.remove('active'));
         chatItem.classList.add('active');
-        updateChatItemStyle(chatItem, false); // Set to muted when active
         loadConversation(userId);
         markAsRead(userId);
+        updateChatItemStyle(chatItem, false);
         
         // Update read status in the database
         fetch('updateReadStatus.php', {
@@ -869,7 +761,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
 
     document.getElementById('send-message-btn').addEventListener('click', debouncedSendMessage);
 
@@ -974,27 +865,5 @@ document.getElementById('offlineStatus').addEventListener('change', function() {
     if (this.checked) {
         setDefaultMessage('offline');
     }
-});
-
-setInterval(() => {
-    updateChat();
-    updateUnreadMessageCount();
-}, 2000);
-
-// Update the chat every 5 seconds
-setInterval(updateChat, 2000);
-
-function updateChat() {
-    loadChatList();
-    if (activeUserId !== null) {
-        loadConversation(activeUserId);
-    }
-    updateUnreadMessageCount();
-}
-
-// Initial update on page load
-document.addEventListener('DOMContentLoaded', () => {
-    loadChatList();
-    updateUnreadMessageCount();
 });
     </script>
