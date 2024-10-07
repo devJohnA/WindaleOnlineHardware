@@ -10,7 +10,7 @@ $conn = new mysqli(DB_SERVER, DB_USER, DB_PASS, DB_NAME);
 // Check connection
 if ($conn->connect_error) {
     error_log("Database connection failed: " . $conn->connect_error);
-    header("Location: error.php?message=" . urlencode("Database connection failed"));
+    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
     exit();
 }
 
@@ -23,44 +23,57 @@ function validate_input($data) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Verify CSRF token
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || 
+        $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         error_log("CSRF token validation failed");
-        header("Location: error.php?message=" . urlencode("Security check failed"));
+        echo json_encode(['success' => false, 'message' => 'Security check failed']);
         exit();
     }
 
-    $proid = intval($_POST['proid']);
+    // Unset the used token
+    unset($_SESSION['csrf_token']);
+
+    // Validate and sanitize inputs
+    $proid = filter_var($_POST['proid'], FILTER_VALIDATE_INT);
     $name = validate_input($_POST['name']);
-    $rating = intval($_POST['rating']);
+    $rating = filter_var($_POST['rating'], FILTER_VALIDATE_INT,
+                         array("options" => array("min_range" => 1, "max_range" => 5)));
     $reviewtext = validate_input($_POST['reviewtext']);
 
     // Validate inputs
-    if (empty($name) || empty($reviewtext) || $rating < 1 || $rating > 5) {
-        header("Location: error.php?message=" . urlencode("Invalid input data"));
+    if ($proid === false || empty($name) || $rating === false || empty($reviewtext)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid input data']);
         exit();
     }
 
-    // // Rate limiting (example: 1 review per minute)
-    // if (isset($_SESSION['last_review_time']) && time() - $_SESSION['last_review_time']) {
-    //     header("Location: error.php?message=" . urlencode("Please wait before submitting another review"));
-    //     exit();
-    // }
+    // Rate limiting (1 review per minute)
+    if (isset($_SESSION['last_review_time']) && (time() - $_SESSION['last_review_time'] < 60)) {
+        echo json_encode(['success' => false, 'message' => 'Please wait before submitting another review']);
+        exit();
+    }
 
+    // Prepare and execute the SQL statement
     $sql = "INSERT INTO tblcustomerreview (PROID, CUSTOMERNAME, RATING, REVIEWTEXT) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
+    if ($stmt === false) {
+        error_log("Error preparing statement: " . $conn->error);
+        echo json_encode(['success' => false, 'message' => 'Error preparing database query']);
+        exit();
+    }
+
     $stmt->bind_param("isis", $proid, $name, $rating, $reviewtext);
 
     if ($stmt->execute()) {
         $_SESSION['last_review_time'] = time();
-        header("Location: index.php?q=single-item&id=" . $proid . "&message=" . urlencode("Review submitted successfully"));
+        echo json_encode(['success' => true, 'message' => 'Thank you for your Reviews about the product, Hoping to see you again']);
     } else {
         error_log("Error submitting review: " . $stmt->error);
-        header("Location: error.php?message=" . urlencode("Error submitting review"));
+        echo json_encode(['success' => false, 'message' => 'Error submitting review']);
     }
 
     $stmt->close();
 } else {
-    header("Location: error.php?message=" . urlencode("Invalid request method"));
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
 
 $conn->close();

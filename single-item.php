@@ -540,11 +540,14 @@ if (!isset($_SESSION['csrf_token'])) {
   </div>
 
     <script>
-    document.getElementById('reviewSubmitForm').addEventListener('submit', function(e) {
+     document.getElementById('reviewSubmitForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     var name = document.getElementById('name').value;
     var review = document.getElementById('review').value;
+    var rating = document.querySelector('input[name="rating"]:checked').value;
+    var proid = document.querySelector('input[name="proid"]').value;
+    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
     
     // Simple XSS check (this is not exhaustive)
     if (/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi.test(name) || 
@@ -575,8 +578,50 @@ if (!isset($_SESSION['csrf_token'])) {
             confirmButtonColor: '#d33'
         });
     } else {
-        // If no XSS detected, submit the form
-        this.submit();
+        // If no XSS detected, submit the form via AJAX
+        var formData = new FormData();
+        formData.append('name', name);
+        formData.append('reviewtext', review);
+        formData.append('rating', rating);
+        formData.append('proid', proid);
+        formData.append('csrf_token', csrfToken);
+
+        fetch('submit_review.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Review Submitted!',
+                    text: data.message,
+                    confirmButtonColor: '#3085d6'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Reload the page or update the review list
+                        location.reload();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: data.message,
+                    confirmButtonColor: '#d33'
+                });
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!',
+                confirmButtonColor: '#d33'
+            });
+        });
     }
 });
 </script>
