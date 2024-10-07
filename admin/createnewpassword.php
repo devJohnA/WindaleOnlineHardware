@@ -14,7 +14,7 @@ if($email == false){
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <style>
-        html, body {
+       html, body {
             height: 100%;
             background-color: #faf9f6;
         }
@@ -41,9 +41,35 @@ if($email == false){
         .start-end {
             text-align: right;
         }
+
+        .custom-shape-divider-bottom-1728231997 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg);
+}
+
+.custom-shape-divider-bottom-1728231997 svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 110px;
+}
+
+.custom-shape-divider-bottom-1728231997 .shape-fill {
+    fill: #FD2323;
+}
     </style>
 </head>
-<body style="background:#Eb212a;" class="d-flex align-items-center justify-content-center">
+<body style="background-color:hsl(49 26.8% 92% /1);" class="d-flex align-items-center justify-content-center">
+<div class="custom-shape-divider-bottom-1728231997">
+    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M1200,0H0V120H281.94C572.9,116.24,602.45,3.86,602.45,3.86h0S632,116.24,923,120h277Z" class="shape-fill"></path>
+    </svg>
+</div>
     <div class="new-password-container bg-white p-4 rounded shadow">
         <div class="start-end"> <img src="../onlinecustomer/win.png" width="80" height="80"></div>
         <form action="createnewpassword.php" method="POST" autocomplete="off">

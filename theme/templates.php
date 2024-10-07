@@ -79,8 +79,10 @@ if (isset($_SESSION['gcCart'])){
                                         Account</a></li>
                                 <li><a href="<?php echo web_root?>logout.php" id="logoutLink"><i class="fa fa-lock"></i> Logout</a></li>
                                 <?php }else{ ?>
-                                <li><a href="onlinecustomer/index.php"><i class="fa fa-lock"></i>
-                                        Sign in</a></li>
+                                    <li><a href="onlinecustomer/index.php"><i class="fa fa-users"></i>
+                                        Customer </a></li>
+                                        <li><a href="./admin/index.php"><i class="fa fa-user-shield"></i>
+                                        Admin</a></li>
                                 <?php } ?>
                             </ul>
                         </div>
