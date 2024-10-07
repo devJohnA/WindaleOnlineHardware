@@ -1,4 +1,9 @@
 <?php
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 define('DB_SERVER', 'localhost');
 define('DB_USER', 'u510162695_dried');
 define('DB_PASS', '1Dried_password');
