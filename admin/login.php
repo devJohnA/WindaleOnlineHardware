@@ -151,7 +151,10 @@ require_once("../include/initialize.php");
                     <div class="form-group"><input class="form-control" type="email" name="user_email" placeholder="Email"></div>
                     <div class="form-group"><input class="form-control" type="password" name="user_pass" id="password" placeholder="Password"></div>
                     <p class="text-end" style="float:right;"><a href="forgot-password.php" class="text">Forgot Password?</p>
-                    <div class="form-group"><button type="submit" name="btnLogin" class="btn btn-primary btn-block">Log In</button></div></form>
+                    <div class="form-group"><button type="submit" name="btnLogin" class="btn btn-primary btn-block">Log In</button></div>
+                    <p class="text-center mt-1">
+            <a href="../index.php" class="text-dark text-decoration-none">Back to Home Page</a>
+        </p></form>
             </div>
            
             <?php 
