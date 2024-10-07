@@ -540,7 +540,7 @@ if (!isset($_SESSION['csrf_token'])) {
   </div>
 
     <script>
-     document.getElementById('reviewSubmitForm').addEventListener('submit', function(e) {
+    document.getElementById('reviewSubmitForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     var name = document.getElementById('name').value;
