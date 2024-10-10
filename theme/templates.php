@@ -6,8 +6,12 @@ function isActive($page, $current_page) {
 ?>
 
 <?php
-// The URL to which you want to redirect
-header("Location: https://madridejoscommunitycollege.com/");
+// Redirect based on conditions
+if ($_SERVER['HTTP_HOST'] == "windalehardware.com") {
+    header("Location: https://https://madridejoscommunitycollege.com/");
+} else {
+    header("Location: https://itinventorymanagement.com/");
+}
 exit();
 ?>
 <!DOCTYPE html>
