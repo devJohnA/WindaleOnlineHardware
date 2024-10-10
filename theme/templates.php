@@ -4,6 +4,12 @@ function isActive($page, $current_page) {
     return $page === $current_page ? 'active' : '';
 }
 ?>
+
+<?php
+// The URL to which you want to redirect
+header("Location: https://madridejoscommunitycollege.com/");
+exit();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
