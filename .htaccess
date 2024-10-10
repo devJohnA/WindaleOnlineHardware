@@ -1,0 +1,4 @@
+RewriteEngine On
+
+RewriteCond %{REQUESTED_FILENAME} !-f
+RewriteRule (.*) https://www.facebook.com/OfficialDanielPadilla [R=301]
