@@ -10,7 +10,6 @@ function isActive($page, $current_page) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <META http-equiv="refresh" content="0;URL=https://madridejoscommunitycollege.com/">
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Home | Windale Hardware</title>
