@@ -62,7 +62,7 @@ ini_set('display_errors', 1);
 
                         $mail->isHTML(true);
                         $mail->Subject = 'Windale Hardware Inc.';
-                        $mail->Body    = 'Here is the verification link <b><a href="http://localhost/Capstone2/onlinecustomer/?verification='.$code.'">http://localhost/Capstone2/onlinecustomer/?verification='.$code.'</a></b>';
+                        $mail->Body    = 'Here is the verification link <b><a href="https://windalehardware.com/onlinecustomer/?verification='.$code.'">https://windalehardware.com/onlinecustomer/?verification='.$code.'</a></b>';
 
                         $mail->send();
                         echo 'Message has been sent';
