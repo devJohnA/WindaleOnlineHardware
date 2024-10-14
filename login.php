@@ -2,6 +2,33 @@
 
 <?php
 
+function setSecurityHeaders() {
+    // Prevent clickjacking attacks
+    header("X-Frame-Options: SAMEORIGIN");
+  
+    // Enable the browser's built-in XSS protection
+    header("X-XSS-Protection: 1; mode=block");
+  
+    // Prevent MIME type sniffing
+    header("X-Content-Type-Options: nosniff");
+  
+    // Enforce HTTPS
+    header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
+  
+    // Control which resources the browser is allowed to load
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'none'; object-src 'none';");
+  
+    // Control how much referrer information should be included with requests
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+  
+    // Disable certain browser features and APIs
+    header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+  }
+  
+  // Call this function at the beginning of your PHP files
+  setSecurityHeaders();
+  
+  
 function checkRequest() {
     $suspicious_inputs = array('UNION', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'EXEC', 'SCRIPT');
     $request = $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . ' ' . file_get_contents('php://input');
