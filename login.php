@@ -1,3 +1,47 @@
+
+<?php 
+function checkRequest() {
+    $suspicious_inputs = array('UNION', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'EXEC', 'SCRIPT');
+    $request = $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . ' ' . file_get_contents('php://input');
+    
+    foreach ($suspicious_inputs as $input) {
+        if (stripos($request, $input) !== false) {
+            error_log("Suspicious request blocked: " . $request);
+            die("Access denied");
+        }
+    }
+    
+    // Check for unusual number of parameters
+    if (count($_GET) + count($_POST) > 20) {
+        error_log("Request with too many parameters blocked: " . $request);
+        die("Access denied");
+    }
+}
+
+// Function for rate limiting
+function rateLimit($key, $limit = 5, $period = 60) {
+    $file = sys_get_temp_dir() . '/rate_limit_' . md5($key);
+    
+    if (file_exists($file)) {
+        $data = json_decode(file_get_contents($file), true);
+        if ($data['time'] + $period > time()) {
+            if ($data['count'] >= $limit) {
+                http_response_code(429);
+                die("Rate limit exceeded. Try again later.");
+            }
+            $data['count']++;
+        } else {
+            $data = ['count' => 1, 'time' => time()];
+        }
+    } else {
+        $data = ['count' => 1, 'time' => time()];
+    }
+    
+    file_put_contents($file, json_stringify($data));
+}
+
+
+?>
 <?php
 
 require_once ("include/initialize.php"); 
