@@ -1,18 +1,18 @@
 <?php
 
 // Function to set security headers
-// function setSecurityHeaders() {
-//   header("X-Frame-Options: SAMEORIGIN");
-//   header("X-XSS-Protection: 1; mode=block");
-//   header("X-Content-Type-Options: nosniff");
-//   header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
-//   header("Content-Security-Policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'none'; object-src 'none';");
-//   header("Referrer-Policy: strict-origin-when-cross-origin");
-//   header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
-// }
+function setSecurityHeaders() {
+  header("X-Frame-Options: SAMEORIGIN");
+  header("X-XSS-Protection: 1; mode=block");
+  header("X-Content-Type-Options: nosniff");
+  header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
+  header("Content-Security-Policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'none'; object-src 'none';");
+  header("Referrer-Policy: strict-origin-when-cross-origin");
+  header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+}
 
-// // Call the function to set headers
-// setSecurityHeaders();
+// Call the function to set headers
+setSecurityHeaders();
    
 
 require_once("../include/initialize.php");
