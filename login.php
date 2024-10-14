@@ -1,5 +1,7 @@
 
-<?php 
+
+<?php
+
 function checkRequest() {
     $suspicious_inputs = array('UNION', 'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'EXEC', 'SCRIPT');
     $request = $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . ' ' . file_get_contents('php://input');
@@ -40,9 +42,6 @@ function rateLimit($key, $limit = 5, $period = 60) {
     file_put_contents($file, json_stringify($data));
 }
 
-
-?>
-<?php
 
 require_once ("include/initialize.php"); 
 
