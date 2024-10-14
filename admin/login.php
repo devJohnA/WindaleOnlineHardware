@@ -176,7 +176,7 @@ require_once("../include/initialize.php");
 </div>
             <div class="login-dark" style="height: 600px;">
             <form method="post" action="" role="login">
-                    <h2 class="sr-only">Logins Form</h2>
+                    <h2 class="sr-only">Login Form</h2>
                     <div class="illustration"><img src="win.png" width="120" height="150"></i></div>
                     <div class="form-group"><input class="form-control" type="email" name="user_email" placeholder="Email"></div>
                     <div class="form-group"><input class="form-control" type="password" name="user_pass" id="password" placeholder="Password"></div>
