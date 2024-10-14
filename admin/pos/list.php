@@ -12,6 +12,16 @@
 .del-color{
     color:red;
 }
+
+.print-ic{
+    color:#fd2323;
+    background:transparent;
+
+}
+
+.add-ic{
+    color:#fd2323;
+}
 </style>
 
 <div class="container-fluid">
@@ -44,7 +54,12 @@
                 <div class="mt-3">
                     <h4>Total: &#8369;<span id="orderTotal">0.00</span></h4>
                 </div>
-                <button id="btnPrint" class="btn btn-success mt-3">Checkout</button>
+                <button id="btnPrint" class="btn print-ic mt-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                        <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                        <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -127,7 +142,11 @@ $('#productSearch').on('input', function() {
                         <td>${product.productName}</td>
                         <td>&#8369;${parseFloat(product.productPrice).toFixed(2)}</td>
                         <td><input type="number" min="1" value="${isOutOfStock ? 0 : 1}" max="${currentStock}" class="form-control quantity" ${isOutOfStock ? 'disabled' : ''}></td>
-                        <td><button class="btn btn-primary add-to-cart" ${isOutOfStock ? 'disabled' : ''}>Add</button></td>
+                      <td> <button class="btn add-ic add-to-cart" ${isOutOfStock ? 'disabled' : ''}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+                    </svg>
+                </button></td>
                     </tr>`;
                     $('#productTable').append(row);
                 });
