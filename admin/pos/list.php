@@ -227,35 +227,65 @@ function updateOrderDisplay() {
         $('#orderContainer').append(`<h4>OR Number: ${orNumber}</h4>`);
     }
 
-    let currentTotal = 0;
+    let subtotal = 0;
     for (const [id, details] of Object.entries(orderItems)) {
         const orderRow = `
             <div class="order-item">
                 <p>${details.name} x ${details.quantity} - &#8369;${details.totalPrice.toFixed(2)}
                 <button class="btn btn-sm del-color cancel-item" data-product-id="${id}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-            </svg>
-        </button>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg>
+                </button>
             </div>`;
         $('#orderContainer').append(orderRow);
-        currentTotal += details.totalPrice;
+        subtotal += details.totalPrice;
     }
 
-    $('#orderTotal').text(currentTotal.toFixed(2));
+    const vat = subtotal * 0.05;
+    const totalAmount = subtotal + vat;
+
+    $('#orderContainer').append(`
+        <hr>
+        <p>Subtotal: &#8369;${subtotal.toFixed(2)}</p>
+        <p>VAT (5%): &#8369;${vat.toFixed(2)}</p>
+    `);
+
+    $('#orderTotal').text(totalAmount.toFixed(2));
 
     if (Object.keys(orderItems).length === 0) {
-        $('#orderContainer').append('<p>No items in the cart.</p>');
+        $('#orderContainer').html('<p>No items in the cart.</p>');
+    } else {
+        // Add payment input form
+        $('#orderContainer').append(`
+            <div class="mt-3">
+                <label for="paymentInput">Payment Received:</label>
+                <input type="number" id="paymentInput" class="form-control" min="${totalAmount.toFixed(2)}" step="0.01">
+            </div>
+            <div class="mt-2">
+                <p>Change: &#8369;<span id="changeAmount">0.00</span></p>
+            </div>
+        `);
+
+        // Add event listener for payment input
+        $('#paymentInput').on('input', function() {
+            const payment = parseFloat($(this).val()) || 0;
+            const change = payment - totalAmount;
+            $('#changeAmount').text(change >= 0 ? change.toFixed(2) : '0.00');
+        });
     }
 }
 
 function generateReceipt() {
+    let subtotal = 0;
     let receiptContent = `
     <div id="receipt-content" style="font-family: 'Courier New', monospace; width: 200px; margin: 0 auto; padding: 0; text-align: center;">
         <div style="position: relative; height: 60px; margin-bottom: 10px;">
             <img src="../win.png" alt="Company Logo" style="position: absolute; top: 0; right: 0; width: 100px; height: 100px;">
         </div>
+        <p style="margin: 0; padding: 1px 0;">Burgos Street, Mancilang, Madridejos, Cebu</p>
+        <p style="margin: 0; padding: 1px 0;">Phone: (+63)9692870485</p>
         <h3 style="margin: 0; padding: 5px 0;">Order Receipt</h3>
         <p style="margin: 0; padding: 2px 0;">OR Number: ${orNumber}</p>
         <hr style="margin: 2px 0; border: none; border-top: 1px dashed #000;">
@@ -264,17 +294,30 @@ function generateReceipt() {
 
     for (const details of Object.values(orderItems)) {
         receiptContent += `<div style="margin: 0; padding: 1px 0;">${details.name}<br>x ${details.quantity} - ₱${details.totalPrice.toFixed(2)}</div>`;
+        subtotal += details.totalPrice;
     }
+
+    const vat = subtotal * 0.05;
+    const totalAmount = subtotal + vat;
+    const paymentReceived = parseFloat($('#paymentInput').val()) || 0;
+    const change = paymentReceived - totalAmount;
 
     receiptContent += `
         </div>
         <hr style="margin: 2px 0; border: none; border-top: 1px dashed #000;">
-        <p style="margin: 0; padding: 2px 0;"><strong>Total: ₱${$('#orderTotal').text()}</strong></p>
+        <p style="margin: 0; text-align: left; padding: 2px 0;">Subtotal: ₱${subtotal.toFixed(2)}</p>
+        <p style="margin: 0; text-align: left; padding: 2px 0;">VAT (5%): ₱${vat.toFixed(2)}</p>
+          <p style="margin: 0; text-align: left;  padding: 2px 0;">Payment Received: ₱${paymentReceived.toFixed(2)}</p>
+        <p style="margin: 0; text-align: left;  padding: 2px 0;">Change: ₱${change.toFixed(2)}</p>
+        <hr style="margin: 2px 0; border: none; border-top: 1px dashed #000;">
+        <p style="margin: 0; text-align: right; padding: 2px 0;"><strong>Total Amount: ₱${totalAmount.toFixed(2)}</strong></p>
+      
         <p style="margin: 0; padding: 2px 0;">Thank you for your purchase!</p>
     </div>`;
 
     return receiptContent;
 }
+
 
 // Update the print styles in the printReceipt function as well
 function printReceipt() {
@@ -351,9 +394,22 @@ $('#btnPrint').on('click', function() {
         return;
     }
 
+    const paymentReceived = parseFloat($('#paymentInput').val()) || 0;
+    const totalAmount = parseFloat($('#orderTotal').text());
+
+    if (paymentReceived < totalAmount) {
+        Swal.fire({
+            title: 'Insufficient Payment',
+            text: 'The payment received is less than the total amount.',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
     const orderDetails = [];
     let productDetailsString = '';
-    let totalPrice = 0;
+    let subtotal = 0;
 
     for (const [id, details] of Object.entries(orderItems)) {
         orderDetails.push({
@@ -362,10 +418,13 @@ $('#btnPrint').on('click', function() {
             price: details.totalPrice
         });
         productDetailsString += `${details.name}:${details.quantity}, `;
-        totalPrice += details.totalPrice;
+        subtotal += details.totalPrice;
     }
 
     productDetailsString = productDetailsString.slice(0, -2);
+
+    const vat = subtotal * 0.05;
+    const change = paymentReceived - totalAmount;
 
     $.ajax({
         type: 'POST',
@@ -373,7 +432,11 @@ $('#btnPrint').on('click', function() {
         data: {
             orNumber: orNumber,
             productDetails: productDetailsString,
-            totalPrice: totalPrice.toFixed(2)
+            subtotal: subtotal.toFixed(2),
+            vat: vat.toFixed(2),
+            totalAmount: totalAmount.toFixed(2),
+            paymentReceived: paymentReceived.toFixed(2),
+            change: change.toFixed(2)
         },
         success: function(response) {
             Swal.fire({
@@ -394,4 +457,5 @@ $('#btnPrint').on('click', function() {
         }
     });
 });
+
 </script>
