@@ -1,30 +1,34 @@
 <?php
 
-function setSecurityHeaders() {
-  // Prevent clickjacking attacks
-  header("X-Frame-Options: SAMEORIGIN");
+   function setSecurityHeaders() {
+       if (headers_sent()) {
+           error_log("Headers already sent. Unable to set security headers.");
+           return;
+       }
 
-  // Enable the browser's built-in XSS protection
-  header("X-XSS-Protection: 1; mode=block");
+       $headers = [
+           'X-Frame-Options' => 'SAMEORIGIN',
+           'X-XSS-Protection' => '1; mode=block',
+           'X-Content-Type-Options' => 'nosniff',
+           'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains; preload',
+           'Content-Security-Policy' => "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'none'; object-src 'none';",
+           'Referrer-Policy' => 'strict-origin-when-cross-origin',
+           'Permissions-Policy' => 'geolocation=(), microphone=(), camera=()'
+       ];
 
-  // Prevent MIME type sniffing
-  header("X-Content-Type-Options: nosniff");
+       foreach ($headers as $key => $value) {
+           if (!headers_sent()) {
+               header("$key: $value");
+           } else {
+               error_log("Unable to set $key header.");
+               break;
+           }
+       }
+   }
 
-  // Enforce HTTPS
-  header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
-
-  // Control which resources the browser is allowed to load
-  header("Content-Security-Policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'none'; object-src 'none';");
-
-  // Control how much referrer information should be included with requests
-  header("Referrer-Policy: strict-origin-when-cross-origin");
-
-  // Disable certain browser features and APIs
-  header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
-}
-
-// Call this function at the beginning of your PHP files
-setSecurityHeaders();
+   // Call this function at the very beginning of your PHP files, before any output
+   setSecurityHeaders();
+   
 
 require_once("../include/initialize.php");
 
