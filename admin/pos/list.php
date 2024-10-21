@@ -414,9 +414,9 @@ $('#btnPrint').on('click', function() {
     }
 
     const paymentReceived = parseFloat($('#paymentInput').val()) || 0;
-    const totalAmount = parseFloat($('#orderTotal').text());
+    const totalPrice = parseFloat($('#orderTotal').text());
 
-    if (paymentReceived < totalAmount) {
+    if (paymentReceived < totalPrice) {
         Swal.fire({
             title: 'Insufficient Payment',
             text: 'The payment received is less than the total amount.',
@@ -443,7 +443,7 @@ $('#btnPrint').on('click', function() {
     productDetailsString = productDetailsString.slice(0, -2);
 
     const vat = subtotal * 0.05;
-    const change = paymentReceived - totalAmount;
+    const change = paymentReceived - totalPrice;
 
     $.ajax({
         type: 'POST',
@@ -451,9 +451,9 @@ $('#btnPrint').on('click', function() {
         data: {
             orNumber: orNumber,
             productDetails: productDetailsString,
+            totalPrice: totalPrice.toFixed(2),
             subtotal: subtotal.toFixed(2),
             vat: vat.toFixed(2),
-            totalAmount: totalAmount.toFixed(2),
             paymentReceived: paymentReceived.toFixed(2),
             change: change.toFixed(2)
         },

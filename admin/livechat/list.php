@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 <div id="confirmationDialog" class="confirmation-dialog" style="display: none;">
-  <p>Delete?</p>
-  <button id="confirmDelete" class="delete-icon" style="border:none; background:transparent;"> <i class="fas fa-pencil-alt text-danger">Yes</i></button>
+  <p><button id="confirmDelete" class="delete-icon" style="border:none; background:transparent;"> <i class="fas fa-pencil-alt text-danger">Yes</i></button>Delete?</p>
+  
   <!-- <button id="cancelDelete" class="fas fa-close text-danger">No</button> -->
 </div>
 
