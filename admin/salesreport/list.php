@@ -48,7 +48,7 @@
         <input type="date" id="dateTo" class="form-control">
     </div>
     <div class="col-md-2 d-flex align-items-end">
-        <button id="generateReport" class="btn btn-primary">Generate Report</button>
+        <button id="generateReport" class="btn btn-danger">Generate Report</button>
     </div>
 </div>
 
@@ -57,7 +57,7 @@
 </div>
 <div class="row mb-4">
     <div class="col-md-12 text-start"> 
-        <button onclick="window.print();" class="btn btn-primary">Print Sales Report</button>
+        <button onclick="window.print();" class="btn btn-danger">Print Sales Report</button>
     </div>
 </div>
 <script>
