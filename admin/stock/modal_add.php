@@ -40,7 +40,7 @@
                         <input type="date" class="form-control" name="productDate" id="productDate">
                     </div>
                     <div class="mb-3">
-                        <label for="images" class="form-label">Upload Image (Only JPG, JPEG, PNG, GIF): </label>
+                        <label for="images" class="form-label">Upload Image (Only JPG, JPEG, PNG): </label>
                         <input type="file" name="images" id="images" accept=".jpg, .jpeg, .png, .gif">
                     </div>
                     <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
