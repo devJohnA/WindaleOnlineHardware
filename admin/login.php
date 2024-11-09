@@ -169,7 +169,7 @@ require_once("../include/initialize.php");
                     <p class="text-end" style="float:right;"><a href="forgot-password.php"  class="p">Forgot Password?</p>
                     <div class="form-group"><button type="submit" name="btnLogin" class="btn btn-primary btn-block">Log In</button></div>
                    <p class="text-center mt-1">
-            <a href="../index.php" class="text-dark text-decoration-none">Back to Homasde Page</a>
+            <a href="../index.php" class="text-dark text-decoration-none">Back to Home Page</a>
         </p></form>
             </div>
            
