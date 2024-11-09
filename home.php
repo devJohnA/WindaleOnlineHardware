@@ -198,6 +198,12 @@
     max-height: 200px; 
     width: auto;
 }
+
+.star-rating {
+    color: #fd2323;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
 </style>
 
 <style>
