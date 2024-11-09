@@ -660,24 +660,33 @@ foreach ($cur as $result) {
                     
                     <!-- Updated Star Rating Display -->
                     <div class="star-rating">
-                        <?php
-                        $avg_rating = $result->avg_rating;
-                        $full_stars = floor($avg_rating);
-                        $half_star = $avg_rating - $full_stars >= 0.5;
-                        $empty_stars = 5 - $full_stars - ($half_star ? 1 : 0);
-
-                        for ($i = 1; $i <= $full_stars; $i++) {
-                            echo '<span class="fa fa-star" style="color: #fd2323;"></span>';
-                        }
-                        if ($half_star) {
-                            echo '<span class="fa fa-star-half-alt" style="color: #fd2323;"></span>';
-                        }
-                        for ($i = 1; $i <= $empty_stars; $i++) {
-                            echo '<span class="far fa-star" style="color: #fd2323;"></span>';
-                        }
-                        ?>
-                        <span>(<?php echo number_format($avg_rating, 1); ?> / <?php echo $result->review_count; ?> reviews)</span>
-                    </div>
+    <?php
+    // Handle NULL rating by defaulting to 0
+    $avg_rating = is_null($result->avg_rating) ? 0 : (float)$result->avg_rating;
+    $review_count = (int)$result->review_count;
+    
+    $full_stars = floor($avg_rating);
+    $half_star = ($avg_rating - $full_stars) >= 0.5;
+    $empty_stars = 5 - $full_stars - ($half_star ? 1 : 0);
+    
+    // Display stars
+    for ($i = 1; $i <= $full_stars; $i++) {
+        echo '<span class="fa fa-star"></span>';
+    }
+    if ($half_star) {
+        echo '<span class="fa fa-star-half-alt"></span>';
+    }
+    for ($i = 1; $i <= $empty_stars; $i++) {
+        echo '<span class="far fa-star"></span>';
+    }
+    
+    // Format display with proper handling of NULL/zero cases
+    $rating_display = $review_count > 0 ? 
+        number_format($avg_rating, 1) : 
+        '0.0';
+    ?>
+    <span>(<?php echo $rating_display; ?> / <?php echo $review_count; ?> reviews)</span>
+</div>
                     
                     <button type="submit" name="btnorder" class="btn btn-default add-to-cart">
                         <i class="fa fa-shopping-cart"></i>Add to cart
