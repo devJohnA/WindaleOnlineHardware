@@ -96,7 +96,7 @@
                                             <img src="<?php echo web_root.'admin/products/'. $result->IMAGES; ?>" alt="" />
                                         </a> 
                                         <h5>&#8369; <?php echo $result->PRODISPRICE; ?></h5>
-                                        <p>Quantity: <em><?php echo $result->PROQTY; ?></em></p>
+                                        <p>Quantasdity: <em><?php echo $result->PROQTY; ?></em></p>
                                         <p><em><?php echo $result->PRODESC; ?></em></p>
                                         
                                         <!-- Star Rating Display -->
