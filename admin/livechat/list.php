@@ -684,7 +684,15 @@ function loadConversation(userId) {
 
                 const messageDiv = document.createElement('div');
                 const timestamp = new Date(msg.timestamp);
-                const formattedTime = isNaN(timestamp.getTime()) ? 'Invalid Date' : timestamp.toLocaleTimeString();
+const phTime = new Date(timestamp.getTime() + (8 * 60 * 60 * 1000)); // Add 8 hours for PH timezone
+const formattedTime = isNaN(timestamp.getTime()) 
+    ? 'Invalid Date' 
+    : phTime.toLocaleTimeString('en-PH', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Manila'
+    });
 
                 messageDiv.className = msg.sender === 'user' ? 'message user-message' : 'message admin-message';
 
