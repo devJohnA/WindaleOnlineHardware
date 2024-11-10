@@ -196,7 +196,7 @@ $notificationCount = $result->num_rows;
             <div class="sidepanel-inner d-flex flex-column">
                 <a href="#" id="sidepanel-close" class="sidepanel-close d-xl-none">&times;</a>
                 <div class="app-branding">
-                    <a class="app-logo" href="index.php"><span class="logo-text">Windale</span></a>
+                    <a class="app-logo" href="index.php"><span class="logo-text">Windale Hardware</span></a>
                 </div>
 
 
