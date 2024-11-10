@@ -883,14 +883,16 @@ document.getElementById('additional-message-form').addEventListener('submit', fu
 
 </script>
 <script>
-         const form = document.getElementById('chat-form');
+             const form = document.getElementById('chat-form');
 const additionalMessageForm = document.getElementById('additional-message-form');
 const messagesDiv = document.getElementById('chat-messages');
 const descText = document.querySelector('.desc-text');
 
 let sessionId = '';
 let userName = '';
-let displayedMessages = new Set();
+// let displayedMessages = new Set();
+let lastMessageTimestamp = null;
+const displayedMessages = new Set();
 
 function showChatInterface() {
     form.style.display = 'none';
@@ -912,7 +914,7 @@ function checkExistingSession() {
 }
 
 // Call this function at the end of your script
-checkExistingSession();
+
 
 function containsXSS(input) {
     const xssPattern = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>|on\w+\s*=|javascript:|<\s*\/?[a-z]|&#|%3C/i;
@@ -1000,12 +1002,13 @@ form.addEventListener('submit', function(event) {
 function displayMessage(sender, message, time, type, imagePath) {
     const msgDiv = document.createElement('div');
     msgDiv.className = type === 'admin' ? 'admin-message' : 'user-message';
-  // Remove the sender display for user messages
-  if (type === 'admin') {
+
+    // Create admin name div BEFORE the message div, and append it directly to messagesDiv
+    if (type === 'admin') {
         const nameDiv = document.createElement('div');
         nameDiv.className = 'admin-name';
         nameDiv.textContent = sender;
-        messagesDiv.appendChild(nameDiv);
+        messagesDiv.appendChild(nameDiv);  // Append directly to messagesDiv first
     }
 
     const contentDiv = document.createElement('div');
@@ -1019,7 +1022,6 @@ function displayMessage(sender, message, time, type, imagePath) {
     msgDiv.appendChild(timeSpan);
 
     if (imagePath) {
-        console.log('Attempting to display image:', imagePath);
         const img = document.createElement('img');
         img.src = imagePath;
         img.className = 'message-image';
@@ -1074,38 +1076,53 @@ additionalMessageForm.addEventListener('submit', function(event) {
 });
 
 function getMessages() {
-   if (!sessionId) return;
+    if (!sessionId) return;
 
-   fetch(`getMessages.php?sessionId=${sessionId}`)
-   .then(response => response.json())
-   .then(data => {
-      console.log('Received messages:', data);
+    fetch(`getMessages.php?sessionId=${sessionId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Received messages:', data);
 
-      messagesDiv.innerHTML = ''; // Clear existing messages
-      displayedMessages.clear(); // Clear the set of displayed messages
+            // Sort messages by timestamp
+            data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-      data.forEach(msg => {
-         // Convert the timestamp to a Date object and adjust for Philippine time
-         const msgDate = new Date(msg.timestamp);
-         msgDate.setHours(msgDate.getHours() + 8); // Add 8 hours to adjust to Philippine time
-         
-         // Format the time as HH:MM:SS in 12-hour format with AM/PM for Philippine time
-         const time = msgDate.toLocaleTimeString('en-PH', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-         });
-         
-         displayMessage(msg.sender, msg.message, time, msg.type, msg.image_path);
-         displayedMessages.add(msg.id);
-      });
-   })
-   .catch(error => console.error('Error:', error));
+            // Clear messages only if we have new data
+            if (data.length > 0) {
+                messagesDiv.innerHTML = '';
+                displayedMessages.clear();
+            }
+
+            // Track unique messages using message ID and timestamp
+            data.forEach(msg => {
+                const messageKey = `${msg.id}_${msg.timestamp}`;
+                
+                // Only display message if it hasn't been shown before
+                if (!displayedMessages.has(messageKey)) {
+                    const msgDate = new Date(msg.timestamp);
+                    msgDate.setHours(msgDate.getHours() + 8); // Adjust to Philippine time
+                    
+                    const time = msgDate.toLocaleTimeString('en-PH', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+
+                    displayMessage(msg.sender, msg.message, time, msg.type, msg.image_path);
+                    displayedMessages.add(messageKey);
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
 }
 
-            // We're not using setInterval anymore as we're not keeping the session
-            setInterval(getMessages, 5000);
+const messagePolling = setInterval(getMessages, 5000);
+
+// Clean up polling when needed
+function cleanupChat() {
+    clearInterval(messagePolling);
+}
+            checkExistingSession();
          </script>
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
