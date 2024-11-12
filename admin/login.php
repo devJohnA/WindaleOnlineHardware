@@ -112,7 +112,7 @@ require_once("../include/initialize.php");
             color: gray;
         }
         button {
-            margin-top: 50px;
+            margin-top: 20px;
             width: 100%;
             background-color: #fd2323;
             color: white;
