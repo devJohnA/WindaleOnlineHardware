@@ -1,26 +1,10 @@
 <?php
 
-// Function to set security headers
-function setSecurityHeaders() {
-  header("X-Frame-Options: SAMEORIGIN");
-  header("X-XSS-Protection: 1; mode=block");
-  header("X-Content-Type-Options: nosniff");
-  header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
-  header("Content-Security-Policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'none'; object-src 'none';");
-  header("Referrer-Policy: strict-origin-when-cross-origin");
-  header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
-}
-
-// Call the function to set headers
-setSecurityHeaders();
-   
-
 require_once("../include/initialize.php");
 
 
 
  ?>
-
 
 <?php
 
@@ -36,144 +20,161 @@ require_once("../include/initialize.php");
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Windale Hardware Store</title>
+ 
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
     <link rel="icon" href="../img/windales.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            <style>.login-dark {
-  height: 600px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-dark form {
-  width: 320px;
-  padding: 40px;
-  border-radius: 4px;
-  color: black;
-}
-
-.login-dark .illustration {
-  text-align: center;
-  padding: 15px 0 20px;
-}
-
-.login-dark form .form-control {
-  background: none;
-  border: none;
-  border-bottom: 1px solid #434a52;
-  border-radius: 0;
-  box-shadow: none;
-  outline: none;
-  color: inherit;
-}
-
-.login-dark form .btn-primary {
-  background: #fd2323;
-  border: none;
-  border-radius: 4px;
-  padding: 11px;
-  box-shadow: none;
-  margin-top: 26px;
-  text-shadow: none;
-  outline: none;
-  width: 100%;
-}
-
-.login-dark form .btn-primary:hover, 
-.login-dark form .btn-primary:active {
-  background: seagreen;
-  outline: none;
-}
-
-.login-dark form .forgot {
-  display: block;
-  text-align: center;
-  font-size: 12px;
-  color: #6f7a85;
-  opacity: 0.9;
-  text-decoration: none;
-}
-
-.login-dark form .forgot:hover, 
-.login-dark form .forgot:active {
-  opacity: 1;
-  text-decoration: none;
-}
-
-.login-dark form .btn-primary:active {
-  transform: translateY(1px);
-}
-
-.p {
-  color: gray;
-  cursor:pointer;
-}
-
-.custom-shape-divider-bottom-1728231997 {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    overflow: hidden;
-    line-height: 0;
-    transform: rotate(180deg);
-}
-
-.custom-shape-divider-bottom-1728231997 svg {
-    position: relative;
-    display: block;
-    width: calc(100% + 1.3px);
-    height: 110px;
-}
-
-.custom-shape-divider-bottom-1728231997 .shape-fill {
-    fill: #FD2323;
-}
-
-@keyframes logoAnimation {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.login-dark .illustration img {
-  animation: logoAnimation 2s ease-in-out infinite;
-}
-              </style>
+    <style media="screen">
+         *,
+        *:before,
+        *:after {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #fff;
+        }
+        .background {
+            width: 430px;
+            height: 520px;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            left: 50%;
+            top: 50%;
+        }
+        .background .shape {
+            height: 200px;
+            width: 200px;
+            position: absolute;
+            border-radius: 50%;
+        }
+        .shape:first-child {
+            background: linear-gradient(#1845ad, #23a2f6);
+            left: -80px;
+            top: -80px;
+        }
+        .shape:last-child {
+            background: linear-gradient(to right, #fd2323, #f09819);
+            right: -30px;
+            bottom: -80px;
+        }
+        form {
+            height: 520px;
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.13);
+            position: absolute;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            left: 50%;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(8, 7, 16, 0.6);
+            padding: 50px 35px;
+        }
+        form * {
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            outline: none;
+            border: none;
+        }
+        label {
+            display: block;
+            margin-top: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            color: black;
+        }
+        .email {
+            margin-top: 70px;
+        }
+        input {
+            display: block;
+            height: 50px;
+            width: 100%;
+            background-color: rgb(0 0 0 / 7%);
+            border-radius: 3px;
+            padding: 0 10px;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 300;
+            color: black;
+        }
+        ::placeholder {
+            color: gray;
+        }
+        button {
+            margin-top: 50px;
+            width: 100%;
+            background-color: #fd2323;
+            color: white;
+            padding: 15px 0;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .social {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .social div {
+            background: red;
+            width: 150px;
+            border-radius: 3px;
+            padding: 5px 10px 10px 5px;
+            background-color: rgba(255, 255, 255, 0.27);
+            color: #eaf0fb;
+            text-align: center;
+        }
+        .social div:hover {
+            background-color: rgba(255, 255, 255, 0.47);
+        }
+        .p {
+            color: gray;
+            cursor: pointer;
+        }
+        .logo-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .logo-container img {
+            width: 100px;
+            height: 100px;
+        }
+    </style>
 </head>
+<body>
+    <div class="background">
+        <div class="shape"></div>
+    </div>
+    <form method="post" action="" role="login">
+    <div class="logo-container">
+            <img src="win.png" alt="Windale Hardware Store Logo">
+        </div>
+<div class="inputgroup">
+        <label for="email" >Email</label>
+        <input type="email" name="user_email" placeholder="Email">
 
-<body style="background-color:hsl(49 26.8% 92% /1);">
-<div class="custom-shape-divider-bottom-1728231997">
-    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-        <path d="M1200,0H0V120H281.94C572.9,116.24,602.45,3.86,602.45,3.86h0S632,116.24,923,120h277Z" class="shape-fill"></path>
-    </svg>
-</div>
-            <div class="login-dark" style="height: 600px;">
-            <form method="post" action="" role="login">
-                    <h2 class="sr-only">Login Form</h2>
-                    <div class="illustration"><img src="win.png" width="120" height="150"></i></div>
-                    <div class="form-group"><input class="form-control" type="email" name="user_email" placeholder="Email"></div>
-                    <div class="form-group"><input class="form-control" type="password" name="user_pass" id="password" placeholder="Password"></div>
-                    <p class="text-end" style="float:right;"><a href="forgot-password.php"  class="p">Forgot Password?</p>
-                    <div class="form-group"><button type="submit" name="btnLogin" class="btn btn-primary btn-block">Log In</button></div>
-                   <p class="text-center mt-1">
-            <a href="../index.php" class="text-dark text-decoration-none">Back to Home Page</a>
-        </p></form>
-            </div>
-           
-            <?php 
+        <label for="password">Password</label>
+        <input type="password" name="user_pass" id="password" placeholder="Password">
+      </div>
+        <p class="text-end" style="float:right;"><a href="forgot-password.php" class="p">Forgot Password?</p>
+        <button type="submit" name="btnLogin">Log In</button>
+        <div class="social">
+        <a href="../index.php" class="text-dark text-end text-decoration-none">Back to Home Page</a>
+        </div>
+    </form>
+    <?php 
 function containsSqlInjection($str) {
   // Allow common email characters
   $str = preg_replace('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '', $str);
@@ -267,5 +268,4 @@ if(isset($_POST['btnLogin'])){
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
