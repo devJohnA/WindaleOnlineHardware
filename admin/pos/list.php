@@ -262,13 +262,17 @@ function updateOrderDisplay() {
         subtotal += details.totalPrice;
     }
 
-    const vat = subtotal * 0.05;
+    const vat = subtotal * 0.03;
     const totalAmount = subtotal + vat;
 
     $('#orderContainer').append(`
         <hr>
         <p>Subtotal: &#8369;${subtotal.toFixed(2)}</p>
-        <p>VAT (5%): &#8369;${vat.toFixed(2)}</p>
+        <p>Percentage Tax (3%): &#8369;${vat.toFixed(2)}</p>
+         <p>Zero-rated: &#8369; 0.00</p>
+         <p>VAT-exempted: &#8369; 0.00</p>
+         <p>Non-VAT: &#8369; 0.00</p>
+         <p>VAT amount: &#8369; 0.00</p>
     `);
 
     $('#orderTotal').text(totalAmount.toFixed(2));
@@ -316,7 +320,7 @@ function generateReceipt() {
         subtotal += details.totalPrice;
     }
 
-    const vat = subtotal * 0.05;
+    const vat = subtotal * 0.03;
     const totalAmount = subtotal + vat;
     const paymentReceived = parseFloat($('#paymentInput').val()) || 0;
     const change = paymentReceived - totalAmount;
@@ -327,6 +331,10 @@ function generateReceipt() {
         <p style="margin: 0; text-align: left; padding: 2px 0;">Subtotal: ₱${subtotal.toFixed(2)}</p>
         <p style="margin: 0; text-align: left; padding: 2px 0;">VAT (5%): ₱${vat.toFixed(2)}</p>
           <p style="margin: 0; text-align: left;  padding: 2px 0;">Payment Received: ₱${paymentReceived.toFixed(2)}</p>
+          <p style="margin: 0; text-align: left;  padding: 2px 0;">Zero-rated: &#8369; 0.00</p>
+         <p style="margin: 0; text-align: left;  padding: 2px 0;">VAT-exempted: &#8369; 0.00</p>
+         <p style="margin: 0; text-align: left;  padding: 2px 0;">Non-VAT: &#8369; 0.00</p>
+         <p style="margin: 0; text-align: left;  padding: 2px 0;">VAT amount: &#8369; 0.00</p>
         <p style="margin: 0; text-align: left;  padding: 2px 0;">Change: ₱${change.toFixed(2)}</p>
         <hr style="margin: 2px 0; border: none; border-top: 1px dashed #000;">
         <p style="margin: 0; text-align: right; padding: 2px 0;"><strong>Total Amount: ₱${totalAmount.toFixed(2)}</strong></p>

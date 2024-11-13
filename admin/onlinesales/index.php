@@ -16,7 +16,7 @@ $view = (isset($_GET['view']) && $_GET['view'] != '') ? $_GET['view'] : '';
 
 $header=$view;
 
-$title="Sales Reports for Online Purchases";
+$title="Digital Sales Reports";
 
 switch ($view) {
 

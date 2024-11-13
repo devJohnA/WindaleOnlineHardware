@@ -36,7 +36,7 @@
     }
     }
 </style>
-<h3 class="text-center mb-4">Sales Reports for Online Purchases</h3>
+<h3 class="text-center mb-4">Digital Sales Report</h3>
 
 <div class="row justify-content-center mb-4">
     <div class="col-md-3">
