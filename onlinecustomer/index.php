@@ -33,6 +33,15 @@ if (isset($_GET['verification'])) {
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <!-- reCAPTCHA v3 js -->
 <script src="https://www.google.com/recaptcha/api.js?render=6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA"></script>
+<script>
+        function executeCaptcha() {
+            grecaptcha.ready(function() {
+                grecaptcha.execute('6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA', { action: 'login' }).then(function(token) {
+                    document.getElementById('recaptcha-token').value = token;
+                });
+            });
+        }
+    </script>
 
     <style>
         html, body {
@@ -106,7 +115,7 @@ if (isset($_GET['verification'])) {
         }
     </style>
 </head>
-<body class="d-flex align-items-center justify-content-center">
+<body class="d-flex align-items-center justify-content-center" onload="executeCaptcha()">
 <div class="custom-shape-divider-bottom-1728097337">
     <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
         <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
@@ -146,6 +155,7 @@ if (isset($_GET['verification'])) {
         
         const formData = new FormData(this);
         formData.append('modalLogin', 'true');
+        formData.append('recaptcha-token', document.getElementById('recaptcha-token').value);
         
         fetch('../login.php', {
             method: 'POST',
