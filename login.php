@@ -1,7 +1,7 @@
 
 
 <?php
-session_start();
+
 function setSecurityHeaders() {
     // Prevent clickjacking attacks
     header("X-Frame-Options: SAMEORIGIN");
@@ -142,11 +142,6 @@ if(isset($_POST['sidebarLogin'])){
 
 
 
-function logError($message) {
-    $logMessage = date('Y-m-d H:i:s') . " - " . $message . "\n";
-    file_put_contents('login_error.log', $logMessage, FILE_APPEND);
-}
-
 function containsSqlInjection($str) {
     // Allow common email characters
     $str = preg_replace('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '', $str);
@@ -170,43 +165,16 @@ function logSqlInjectionAttempt($ip_address) {
     $mydb->executeQuery();
 }
 
-function logRecaptchaScore($ip_address, $score) {
-    global $mydb;
-    $mydb->setQuery("INSERT INTO `tbl_recaptcha_logs` (`ip_address`, `score`, `attempt_date`) VALUES ('" . $mydb->escape_value($ip_address) . "', $score, NOW())");
-    $mydb->executeQuery();
-}
 
 header('Content-Type: application/json');
 
-if (isset($_POST['modalLogin'])) {
+if(isset($_POST['modalLogin'])) {
     $email = trim($_POST['U_USERNAME']);
     $upass = trim($_POST['U_PASS']);
-    $recaptchaToken = $_POST['recaptcha-token'];
     $ip_address = $_SERVER['REMOTE_ADDR'];
-
-    logError("Login attempt for email: $email, IP: $ip_address");
-
-    // reCAPTCHA v3 verification
-    $secretKey = "6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf";
-    $recaptchaResponse = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$secretKey&response=$recaptchaToken");
-    $recaptchaData = json_decode($recaptchaResponse, true);
-
-    if (!$recaptchaData['success'] || $recaptchaData['score'] < 0.5) {
-        logRecaptchaScore($ip_address, $recaptchaData['score']);
-        logError("reCAPTCHA verification failed for IP: $ip_address, Score: " . $recaptchaData['score']);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Suspicious activity detected. Please try again later.',
-            'sqlInjection' => false
-        ]);
-        exit;
-    } else {
-        logRecaptchaScore($ip_address, $recaptchaData['score']);
-    }
 
     if (containsSqlInjection($email) || containsSqlInjection($upass)) {
         logSqlInjectionAttempt($ip_address);
-        logError("SQL Injection attempt detected for email: $email, IP: $ip_address");
         echo json_encode([
             'status' => 'error',
             'message' => 'Security Breach Detected',
@@ -214,61 +182,64 @@ if (isset($_POST['modalLogin'])) {
         ]);
         exit;
     }
-
-    if ($email == '' || $upass == '') {
-        logError("Invalid input - Empty username or password");
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Invalid Username and Password!'
-        ]);
-        exit;
-    } else {
-        global $mydb;
-        $mydb->setQuery("SELECT * FROM `tblcustomer` WHERE `CUSUNAME` = '" . $mydb->escape_value($email) . "'");
-        $cur = $mydb->executeQuery();
-
-        if ($mydb->num_rows($cur) > 0) {
-            $customer_data = $mydb->loadSingleResult();
-
-            if (password_verify($upass, $customer_data->CUSPASS)) {
-                if (!empty($customer_data->code)) {
-                    logError("Email verification required for user: $email");
-                    echo json_encode([
-                        'status' => 'error',
-                        'message' => 'Please verify your email address first.'
-                    ]);
-                    exit;
-                }
-
-                $_SESSION['CUSID'] = $customer_data->CUSTOMERID;
-                $_SESSION['CUSNAME'] = $customer_data->FNAME . ' ' . $customer_data->LNAME;
-
-                logError("Login successful for user: $email");
-                echo json_encode([
-                    'status' => 'success',
-                    'message' => 'Login successful!',
-                    'redirect' => web_root . "index.php"
-                ]);
-            } else {
-                logError("Invalid password for user: $email");
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Invalid Username and Password!'
-                ]);
-            }
-        } else {
-            logError("No user found with username: $email");
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Invalid Username and Password!'
-            ]);
-        }
-    }
+   
+   if ($email == '' OR $upass == '') {
+       echo json_encode([
+           'status' => 'error',
+           'message' => 'Invalid Username and Password!'
+       ]);
+       exit;
+   } else {
+       $h_upass = sha1($upass);
+       
+       global $mydb;
+       $mydb->setQuery("SELECT * FROM `tblcustomer` WHERE `CUSUNAME` = '" . $mydb->escape_value($email) . "' AND `CUSPASS` = '" . $mydb->escape_value($h_upass) . "'");
+       $cur = $mydb->executeQuery();
+       
+       if($mydb->num_rows($cur) > 0) {
+           $customer_data = $mydb->loadSingleResult();
+           
+           if (!empty($customer_data->code)) {
+               echo json_encode([
+                   'status' => 'error',
+                   'message' => 'Please verify your email address first.'
+               ]);
+               exit;
+           }
+           
+           $_SESSION['CUSID'] = $customer_data->CUSTOMERID;
+           $_SESSION['CUSNAME'] = $customer_data->FNAME . ' ' . $customer_data->LNAME;
+           
+           if(empty($_POST['proid'])) {
+               echo json_encode([
+                   'status' => 'success',
+                   'message' => 'Login successful!',
+                   'redirect' => web_root . "index.php"
+               ]);
+           } else {
+               $proid = $_POST['proid'];
+               $cusid = $_SESSION['CUSID'];
+               $mydb->setQuery("INSERT INTO `tblwishlist` (`PROID`, `CUSID`, `WISHDATE`, `WISHSTATS`)
+                                VALUES ('$proid', '$cusid', NOW(), 0)");
+               $mydb->executeQuery();
+               
+               echo json_encode([
+                   'status' => 'success',
+                   'message' => 'Login successful!',
+                   'redirect' => web_root . "index.php?q=profile"
+               ]);
+           }
+       } else {
+           echo json_encode([
+               'status' => 'error',
+               'message' => 'Invalid Username and Password!'
+           ]);
+       }
+   }
 } else {
-    logError("Invalid request");
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Invalid request'
-    ]);
+   echo json_encode([
+       'status' => 'error',
+       'message' => 'Invalid request'
+   ]);
 }
 ?>
