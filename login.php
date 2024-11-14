@@ -221,43 +221,46 @@ if (isset($_POST['modalLogin'])) {
         if ($mydb->num_rows($cur) > 0) {
             $customer_data = $mydb->loadSingleResult();
 
-            if (password_verify($upass, $customer_data->CUSPASS)) {
-                if (!empty($customer_data->code)) {
-                    echo json_encode([
-                        'status' => 'error',
-                        'message' => 'Please verify your email address first.'
-                    ]);
-                    exit;
-                }
-
-                $_SESSION['CUSID'] = $customer_data->CUSTOMERID;
-                $_SESSION['CUSNAME'] = $customer_data->FNAME . ' ' . $customer_data->LNAME;
-
-                if (empty($_POST['proid'])) {
-                    echo json_encode([
-                        'status' => 'success',
-                        'message' => 'Login successful!',
-                        'redirect' => web_root . "index.php"
-                    ]);
-                } else {
-                    $proid = $_POST['proid'];
-                    $cusid = $_SESSION['CUSID'];
-                    $mydb->setQuery("INSERT INTO `tblwishlist` (`PROID`, `CUSID`, `WISHDATE`, `WISHSTATS`) VALUES ('$proid', '$cusid', NOW(), 0)");
-                    $mydb->executeQuery();
-
-                    echo json_encode([
-                        'status' => 'success',
-                        'message' => 'Login successful!',
-                        'redirect' => web_root . "index.php?q=profile"
-                    ]);
-                }
-            } else {
+            if (!password_verify($upass, $customer_data->CUSPASS)) {
+                file_put_contents('login_error.log', "Password verification failed for user: " . $email . "\n", FILE_APPEND);
                 echo json_encode([
                     'status' => 'error',
                     'message' => 'Invalid Username and Password!'
                 ]);
+                exit;
+            }
+
+            if (!empty($customer_data->code)) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Please verify your email address first.'
+                ]);
+                exit;
+            }
+
+            $_SESSION['CUSID'] = $customer_data->CUSTOMERID;
+            $_SESSION['CUSNAME'] = $customer_data->FNAME . ' ' . $customer_data->LNAME;
+
+            if (empty($_POST['proid'])) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Login successful!',
+                    'redirect' => web_root . "index.php"
+                ]);
+            } else {
+                $proid = $_POST['proid'];
+                $cusid = $_SESSION['CUSID'];
+                $mydb->setQuery("INSERT INTO `tblwishlist` (`PROID`, `CUSID`, `WISHDATE`, `WISHSTATS`) VALUES ('$proid', '$cusid', NOW(), 0)");
+                $mydb->executeQuery();
+
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Login successful!',
+                    'redirect' => web_root . "index.php?q=profile"
+                ]);
             }
         } else {
+            file_put_contents('login_error.log', "No user found with email: " . $email . "\n", FILE_APPEND);
             echo json_encode([
                 'status' => 'error',
                 'message' => 'Invalid Username and Password!'
