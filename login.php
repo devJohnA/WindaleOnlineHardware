@@ -187,7 +187,7 @@ if (isset($_POST['modalLogin'])) {
     logError("Login attempt for email: $email, IP: $ip_address");
 
     // reCAPTCHA v3 verification
-    $secretKey = "your-secret-key";
+    $secretKey = "6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf";
     $recaptchaResponse = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$secretKey&response=$recaptchaToken");
     $recaptchaData = json_decode($recaptchaResponse, true);
 
