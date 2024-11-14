@@ -222,7 +222,8 @@ if (isset($_POST['modalLogin'])) {
             $customer_data = $mydb->loadSingleResult();
 
             if (!password_verify($upass, $customer_data->CUSPASS)) {
-                file_put_contents('login_error.log', "Password verification failed for user: " . $email . "\n", FILE_APPEND);
+                file_put_contents('login_error.log', "Error occurred at: " . date('Y-m-d H:i:s') . " - Invalid Username: $email\n", FILE_APPEND);
+
                 echo json_encode([
                     'status' => 'error',
                     'message' => 'Invalid Username and Password!'
