@@ -1,7 +1,7 @@
 
 
 <?php
-
+session_start();
 function setSecurityHeaders() {
     // Prevent clickjacking attacks
     header("X-Frame-Options: SAMEORIGIN");
