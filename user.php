@@ -14,7 +14,7 @@ include 'admin/dbcon/conn.php'; // Include your database connection
 
 // Query to select only the first and last names
 $query = "SELECT FNAME, LNAME FROM tblcustomer";
-$result = $mydb->executeQuery($query);
+$result = $conn->query($query); // Use the $conn object for the query
 
 if ($result->num_rows > 0) {
     echo "<table border='1'>";
