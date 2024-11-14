@@ -36,7 +36,7 @@ if (isset($_GET['verification'])) {
 <script>
         function executeCaptcha() {
             grecaptcha.ready(function() {
-                grecaptcha.execute('6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA', { action: '../login' }).then(function(token) {
+                grecaptcha.execute('6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA', { action: '../login.php' }).then(function(token) {
                     document.getElementById('recaptcha-token').value = token;
                 });
             });
