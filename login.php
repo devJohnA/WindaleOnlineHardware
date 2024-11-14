@@ -175,7 +175,7 @@ if (isset($_POST['modalLogin'])) {
     $ip_address = $_SERVER['REMOTE_ADDR'];
 
     // reCAPTCHA v3 verification
-    $secretKey = "your-secret-key";
+    $secretKey = "6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf";
     $recaptchaResponse = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$secretKey&response=$recaptchaToken");
     $recaptchaData = json_decode($recaptchaResponse, true);
 
