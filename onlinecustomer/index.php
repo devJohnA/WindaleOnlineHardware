@@ -15,6 +15,7 @@ if (isset($_GET['verification'])) {
     }
 }
 
+$recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,6 +27,8 @@ if (isset($_GET['verification'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://www.google.com/recaptcha/api.js?render=<?php echo $recaptcha_site_key; ?>"></script>
 
     <style>
         html, body {
@@ -134,78 +137,83 @@ if (isset($_GET['verification'])) {
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const formData = new FormData(this);
-        formData.append('modalLogin', 'true');
-        
-        fetch('../login.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: data.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(() => {
-                    window.location.href = data.redirect;
-                });
-            } else if (data.sqlInjection) {
+        // Execute reCAPTCHA verification
+        grecaptcha.execute('<?php echo $recaptcha_site_key; ?>', {action: 'login'})
+        .then(function(token) {
+            document.getElementById('recaptchaResponse').value = token;
+            
+            const formData = new FormData(e.target);
+            formData.append('modalLogin', 'true');
+            
+            fetch('../login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = data.redirect;
+                    });
+                } else if (data.sqlInjection) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Security Breach Detected',
+                        html: '<div style="font-size: 1.2em;">🚨 WARNING: SQL Injection Attempt Detected 🚨</div><br>' +
+                              '<p>Your IP address has been logged and Inserted to Database.</p>' +
+                              '<p>Further attempts will result in immediate account lockout and potential legal action.</p>' +
+                              '<br><div style="font-size: 1.1em; color: #ff0000;">This incident will be investigated thoroughly.</div>',
+                        confirmButtonText: 'I Understand the Consequences',
+                        confirmButtonColor: '#d33',
+                        showCancelButton: false,
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'index.php';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Security Breach Detected',
-                    html: '<div style="font-size: 1.2em;">🚨 WARNING: SQL Injection Attempt Detected 🚨</div><br>' +
-                          '<p>Your IP address has been logged and Inserted to Database.</p>' +
-                          '<p>Further attempts will result in immediate account lockout and potential legal action.</p>' +
-                          '<br><div style="font-size: 1.1em; color: #ff0000;">This incident will be investigated thoroughly.</div>',
-                    confirmButtonText: 'I Understand the Consequences',
-                    confirmButtonColor: '#d33',
-                    showCancelButton: false,
-                    allowOutsideClick: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'index.php';
-                    }
+                    title: 'Oops...',
+                    text: 'Something went wrong!'
                 });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: data.message
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Something went wrong!'
             });
         });
     });
 
-        function togglePassword() {
-            const passwordInput = document.getElementById('U_PASS');
-            const toggleIcon = document.getElementById('toggleIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
-            }
-        }
+    function togglePassword() {
+        const passwordInput = document.getElementById('U_PASS');
+        const toggleIcon = document.getElementById('toggleIcon');
         
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
     </script>
 
 </body>

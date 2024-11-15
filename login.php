@@ -141,6 +141,31 @@ if(isset($_POST['sidebarLogin'])){
 }
 
 
+define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
+
+function verifyRecaptcha($recaptcha_response) {
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $data = array(
+        'secret' => RECAPTCHA_SECRET_KEY,
+        'response' => $recaptcha_response,
+        'remoteip' => $_SERVER['REMOTE_ADDR']
+    );
+
+    $options = array(
+        'http' => array(
+            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method' => 'POST',
+            'content' => http_build_query($data)
+        )
+    );
+
+    $context = stream_context_create($options);
+    $verify = file_get_contents($url, false, $context);
+    $captcha_success = json_decode($verify);
+
+    return $captcha_success;
+}
+
 
 function containsSqlInjection($str) {
     // Allow common email characters
@@ -172,6 +197,17 @@ if(isset($_POST['modalLogin'])) {
     $email = trim($_POST['U_USERNAME']);
     $upass = trim($_POST['U_PASS']);
     $ip_address = $_SERVER['REMOTE_ADDR'];
+    $recaptcha_response = $_POST['recaptcha_response'];
+
+    // Verify reCAPTCHA first
+    $recaptcha_verify = verifyRecaptcha($recaptcha_response);
+    if (!$recaptcha_verify->success || $recaptcha_verify->score < 0.5) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Security verification failed. Please try again.'
+        ]);
+        exit;
+    }
 
     if (containsSqlInjection($email) || containsSqlInjection($upass)) {
         logSqlInjectionAttempt($ip_address);
