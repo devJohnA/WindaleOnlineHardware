@@ -115,6 +115,8 @@ $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
         <?php echo $msg; ?>
         <form action="../login.php"  method="POST" id="loginForm">
         <input class="proid" type="hidden" name="proid" id="proid" value="">
+        <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
+        <div class="mb-3">
             <div class="mb-3">
                 <input type="email"  id="U_USERNAME"  name="U_USERNAME" class="form-control" placeholder="Email account" required>
             </div>
