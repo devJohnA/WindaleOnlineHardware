@@ -143,7 +143,7 @@ $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
         e.preventDefault();
         
         // Execute reCAPTCHA verification
-        grecaptcha.execute('<?php echo $recaptcha_site_key; ?>', {action: 'login', badge: 'inline'})
+        grecaptcha.execute('<?php echo $recaptcha_site_key; ?>', {action: 'login'})
         .then(function(token) {
             document.getElementById('recaptchaResponse').value = token;
             
