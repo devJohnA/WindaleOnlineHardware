@@ -127,7 +127,7 @@ $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
                 </span>
             </div>
             <div class="text-end mb-3">
-                <a href="forgot-password.php" class="text text-decoration-none">Forgot password?</a>
+                <a href="choose-forgotpass.php" class="text text-decoration-none">Forgot password?</a>
             </div>
             <button type="submit" id="modalLogin" name="modalLogin" class="btn btn-danger w-100 mb-3">Sign in</button>
             <p class="text-center mb-0">Not a member? <a href="signup.php" class="text-danger">Signup</a></p>
