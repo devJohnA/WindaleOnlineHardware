@@ -320,7 +320,7 @@ if(isset($_POST['btnLogin'])){
         </div>
     </form>
     <script>
-   document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     grecaptcha.ready(function() {
@@ -347,17 +347,28 @@ function submitForm() {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())  // Parse JSON response
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
-        Swal.fire({
-            icon: data.status,
-            title: data.status === 'success' ? 'Success!' : 'Error',
-            text: data.message,
-        }).then(() => {
-            if (data.status === 'success' && data.redirect) {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+            }).then(() => {
                 window.location.href = data.redirect;
-            }
-        });
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'An unexpected error occurred. Please try again.',
+            });
+        }
     })
     .catch(error => {
         console.error('Error:', error);
