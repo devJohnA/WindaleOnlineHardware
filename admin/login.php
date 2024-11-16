@@ -226,65 +226,50 @@ if (isset($_POST['btnLogin'])) {
         </div>
     </form>
     <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    grecaptcha.ready(function() {
-        grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
-            .then(function(token) {
-                document.getElementById('recaptchaResponse').value = token;
-                submitForm();
-            })
-            .catch(function(error) {
-                console.error('reCAPTCHA error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to verify reCAPTCHA. Please try again.',
-                });
-            });
-    });
-});
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-function submitForm() {
-    const formData = new FormData(document.getElementById('loginForm'));
-    
-    fetch(window.location.href, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: data.message,
-            }).then(() => {
-                window.location.href = data.redirect;
+            grecaptcha.ready(function () {
+                grecaptcha.execute('6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA', { action: 'login' })
+                    .then(function (token) {
+                        document.getElementById('recaptchaResponse').value = token;
+
+                        // Submit form via fetch
+                        const formData = new FormData(document.getElementById('loginForm'));
+
+                        fetch('login-handler.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: data.message,
+                                    }).then(() => {
+                                        window.location.href = data.redirect;
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: data.message || 'An unexpected error occurred.',
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'A network error occurred. Please try again later.',
+                                });
+                            });
+                    });
             });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message || 'An unexpected error occurred. Please try again.',
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An unexpected error occurred. Please try again.',
         });
-    });
-}
     </script>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
