@@ -134,7 +134,7 @@ $con = mysqli_connect('localhost', 'u510162695_dried', '1Dried_password', 'u5101
         }else{
             $code = 0;
             $email = $_SESSION['CUSUNAME']; //getting this email using session
-            $encpass = sha1($password);
+            $encpass = password_hash($password, PASSWORD_BCRYPT);
             $update_pass = "UPDATE tblcustomer SET ZIPCODE = $code, CUSPASS = '$encpass' WHERE CUSUNAME = '$email'";
             $run_query = mysqli_query($con, $update_pass);
             if($run_query){
