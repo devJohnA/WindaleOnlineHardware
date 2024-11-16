@@ -11,42 +11,46 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// SQL to create tbluseraccount table
+// SQL to create the login_logs table
 $sqlCreateTable = "
-CREATE TABLE IF NOT EXISTS `tbluseraccount` (
-  `USERID` int(11) NOT NULL AUTO_INCREMENT,
-  `U_NAME` varchar(122) NOT NULL,
-  `U_USERNAME` varchar(122) NOT NULL,
-  `U_CON` varchar(11) NOT NULL,
-  `U_EMAIL` varchar(225) NOT NULL,
-  `U_PASS` varchar(122) NOT NULL,
-  `U_ROLE` varchar(30) NOT NULL,
-  `USERIMAGE` varchar(255) NOT NULL,
-  `Code` varchar(250) NOT NULL,
-  `SECRET_KEY` varchar(255) NOT NULL,
-  `IS_2FA_VERIFIED` tinyint(1) DEFAULT 0,
-  PRIMARY KEY (`USERID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+CREATE TABLE IF NOT EXISTS `login_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `USERID` int(11) NOT NULL,
+  `login_time` datetime NOT NULL,
+  `status` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `USERID` (`USERID`),
+  CONSTRAINT `login_logs_ibfk_1` FOREIGN KEY (`USERID`) REFERENCES `tbluseraccount` (`USERID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ";
 
 // Execute the query to create the table
 if ($conn->query($sqlCreateTable) === TRUE) {
-    echo "Table tbluseraccount created successfully!<br>";
+    echo "Table login_logs created successfully!<br>";
 } else {
     echo "Error creating table: " . $conn->error . "<br>";
 }
 
-// SQL to insert data into tbluseraccount
+// SQL to insert data into login_logs
 $sqlInsertData = "
-INSERT INTO `tbluseraccount` (`USERID`, `U_NAME`, `U_USERNAME`, `U_CON`, `U_EMAIL`, `U_PASS`, `U_ROLE`, `USERIMAGE`, `Code`, `SECRET_KEY`, `IS_2FA_VERIFIED`) 
+INSERT INTO `login_logs` (`id`, `USERID`, `login_time`, `status`) 
 VALUES
-(11, 'Dante Montecalvo', 'dante@gmail.com', '09091296064', '', '$2y$10$Ga76I/ZywTd0krj57dCvOu031aoocYIeCJ02S1v6gAKZmUUCH4CSu', 'Staff', '', '', '', 0),
-(15, 'John Anthon Dela Cruz', 'delacruzjohnanthon@gmail.com', '09692870485', '', '$2y$10$fHsiEuaLAQYlRfITjPQ.qO8AjrTptDHFxMlO8.J./n92Q8hlfHxKG', 'Administrator', '', '', '3XNZZCLV4KHWQKEO', 0);
+(1, 15, '2024-11-16 12:12:24', 'success'),
+(2, 15, '2024-11-16 12:25:23', 'success'),
+(3, 15, '2024-11-16 12:28:36', 'success'),
+(4, 15, '2024-11-16 12:28:42', 'failed_2fa'),
+(5, 15, '2024-11-16 12:47:32', 'success'),
+(6, 15, '2024-11-16 13:04:50', 'failed_2fa'),
+(7, 15, '2024-11-16 13:05:07', 'failed_2fa'),
+(8, 15, '2024-11-16 13:08:38', 'success'),
+(9, 15, '2024-11-16 14:55:39', 'failed_2fa'),
+(10, 15, '2024-11-16 14:55:47', 'failed_2fa'),
+(11, 15, '2024-11-16 14:55:57', 'success');
 ";
 
 // Execute the data insertion query
 if ($conn->query($sqlInsertData) === TRUE) {
-    echo "Data inserted into tbluseraccount successfully!<br>";
+    echo "Data inserted into login_logs successfully!<br>";
 } else {
     echo "Error inserting data: " . $conn->error . "<br>";
 }
