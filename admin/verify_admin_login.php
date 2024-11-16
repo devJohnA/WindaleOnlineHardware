@@ -2,7 +2,7 @@
 session_start();
 require_once("../include/initialize.php");
 
-define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA'); // Use your secret key here
+define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf'); // Use your secret key here
 
 function verifyRecaptcha($recaptcha_response) {
     $url = 'https://www.google.com/recaptcha/api/siteverify';
