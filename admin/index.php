@@ -4,7 +4,7 @@ require_once("../include/initialize.php");
 
 	 if (!isset($_SESSION['USERID'])){
 
-      redirect(web_root."admin/login.php");
+      redirect(web_root."admin/authenticator.php");
 
      } 
 
