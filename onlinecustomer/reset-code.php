@@ -31,27 +31,7 @@ if($email == false){
         .start-end {
             text-align: right;
         }
-        .custom-shape-divider-bottom-1728097337 {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            overflow: hidden;
-            line-height: 0;
-            z-index: 1;
-        }
-
-        .custom-shape-divider-bottom-1728097337 svg {
-            position: relative;
-            display: block;
-            width: calc(100% + 1.3px);
-            height: 260px;
-            transform: rotateY(180deg);
-        }
-
-        .custom-shape-divider-bottom-1728097337 .shape-fill {
-            fill: #FD2323;
-        }
+        
     </style>
 </head>
 <body class="d-flex align-items-center justify-content-center">
