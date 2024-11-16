@@ -1,5 +1,9 @@
 <?php
 
+require_once '../../vendor/autoload.php';
+use Sonata\GoogleAuthenticator\GoogleAuthenticator;
+use Sonata\GoogleAuthenticator\GoogleQrUrl;
+
 require_once ("../../include/initialize.php");
 
 	 if (!isset($_SESSION['USERID'])){
