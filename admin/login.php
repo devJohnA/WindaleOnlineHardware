@@ -1,27 +1,177 @@
 <?php
 session_start();
+header('Content-Type: application/json'); // Set JSON response header
+$msg = "";
+
 require_once("../include/initialize.php");
 
-// Add reCAPTCHA key
+// Add reCAPTCHA keys
+define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
 define('RECAPTCHA_SITE_KEY', '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA');
+
+// Function to verify reCAPTCHA
+function verifyRecaptcha($recaptcha_response) {
+    if (empty($recaptcha_response)) {
+        return false;
+    }
+
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $data = [
+        'secret' => RECAPTCHA_SECRET_KEY,
+        'response' => $recaptcha_response
+    ];
+
+    $options = [
+        'http' => [
+            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method' => 'POST',
+            'content' => http_build_query($data)
+        ]
+    ];
+
+    $context = stream_context_create($options);
+    $response = file_get_contents($url, false, $context);
+    $result = json_decode($response);
+
+    return $result && $result->success;
+}
+
+// Function to send JSON response
+function sendJsonResponse($status, $message, $redirect = null) {
+    $response = [
+        'status' => $status,
+        'message' => $message
+    ];
+    
+    if ($redirect) {
+        $response['redirect'] = $redirect;
+    }
+    
+    echo json_encode($response);
+    exit;
+}
+
+if(isset($_SESSION['USERID'])){
+    sendJsonResponse('success', 'Already logged in', web_root."admin/index.php");
+}
+
+if(isset($_POST['btnLogin'])){
+    $email = trim($_POST['user_email']);
+    $pass = trim($_POST['user_pass']);
+    $recaptcha_response = $_POST['recaptcha_response'] ?? '';
+
+    // Verify reCAPTCHA first
+    if (!verifyRecaptcha($recaptcha_response)) {
+        sendJsonResponse('error', 'reCAPTCHA verification failed');
+    }
+    
+    if ($email == '' OR $pass == '') {
+        sendJsonResponse('error', 'Email and Password are required!');
+    }
+
+    $user = new User();
+    
+    if (User::checkUsernameExists($email)) {
+        $res = User::userAuthentication($email, $pass);
+        if ($res == true) {
+            $_SESSION['success_message'] = "Login successful!";
+            sendJsonResponse('success', 'You logged in successfully!', web_root."admin/index.php");
+        } else {
+            sendJsonResponse('error', 'Invalid password. Please try again.');
+        }
+    } else {
+        sendJsonResponse('error', 'Account not found. Please check your email address.');
+    }
+}
+
+// If it's not a POST request, return an error
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    sendJsonResponse('error', 'Invalid request method');
+}
 
 if(isset($_SESSION['USERID'])){
     redirect(web_root."admin/index.php");
 }
+
+if(isset($_POST['btnLogin'])){
+    $email = trim($_POST['user_email']);
+    $pass = trim($_POST['user_pass']);
+    $recaptcha_response = $_POST['recaptcha_response'] ?? '';
+
+    // Verify reCAPTCHA first
+    if (!verifyRecaptcha($recaptcha_response)) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'reCAPTCHA Verification Failed',
+                text: 'Please try again.',
+            });
+        </script>";
+        return;
+    }
+    
+    if ($email == '' OR $pass == '') {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Email and Password are required!',
+            });
+        </script>";
+        return;
+    }
+
+    $user = new User();
+    
+    if (User::checkUsernameExists($email)) {
+        $res = User::userAuthentication($email, $pass);
+        if ($res == true) {
+            $_SESSION['success_message'] = "Login successful!";
+            echo "<script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'You logged in successfully!',
+                }).then((result) => {
+                    window.location.href = '".web_root."admin/index.php';
+                });
+            </script>";
+        } else {
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Password',
+                    text: 'Please try again.',
+                });
+            </script>";
+        }
+    } else {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Account Not Found',
+                text: 'Please check your email address.',
+            });
+        </script>";
+    }
+}
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Windale Hardware Store</title>
+ 
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
     <link rel="icon" href="../img/windales.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+             <!-- Add reCAPTCHA v3 script -->
     <script src="https://www.google.com/recaptcha/api.js?render=<?php echo RECAPTCHA_SITE_KEY; ?>"></script>
-    
             
     <style media="screen">
          *,
@@ -193,17 +343,11 @@ if(isset($_SESSION['USERID'])){
 function submitForm() {
     const formData = new FormData(document.getElementById('loginForm'));
     
-    // Make sure this path matches your actual file structure
-    fetch('login-handler.php', {
+    fetch(window.location.href, {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
+    .then(response => response.json())  // Parse JSON response
     .then(data => {
         Swal.fire({
             icon: data.status,
