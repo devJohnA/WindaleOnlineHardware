@@ -43,6 +43,14 @@ if(isset($_SESSION['USERID'])){
     exit;
 }
 
+// Check if it's NOT a POST request first
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $response['message'] = 'Invalid request method';
+    echo json_encode($response);
+    exit;
+}
+
+// Process login only if it's a POST request
 if(isset($_POST['btnLogin'])){
     $email = trim($_POST['user_email']);
     $pass = trim($_POST['user_pass']);
@@ -77,13 +85,6 @@ if(isset($_POST['btnLogin'])){
         $response['message'] = 'Account not found. Please check your email address.';
     }
     
-    echo json_encode($response);
-    exit;
-}
-
-// If it's not a POST request, return an error
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $response['message'] = 'Invalid request method';
     echo json_encode($response);
     exit;
 }
