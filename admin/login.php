@@ -1,7 +1,6 @@
 <?php
 session_start();
-header('Content-Type: application/json'); // Set JSON response header
-$response = ['status' => 'error', 'message' => '', 'redirect' => ''];
+$msg = "";
 
 require_once("../include/initialize.php");
 
@@ -37,20 +36,9 @@ function verifyRecaptcha($recaptcha_response) {
 }
 
 if(isset($_SESSION['USERID'])){
-    $response['status'] = 'success';
-    $response['redirect'] = web_root."admin/index.php";
-    echo json_encode($response);
-    exit;
+    redirect(web_root."admin/index.php");
 }
 
-// Check if it's NOT a POST request first
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response['message'] = 'Invalid request method';
-    echo json_encode($response);
-    exit;
-}
-
-// Process login only if it's a POST request
 if(isset($_POST['btnLogin'])){
     $email = trim($_POST['user_email']);
     $pass = trim($_POST['user_pass']);
@@ -58,15 +46,25 @@ if(isset($_POST['btnLogin'])){
 
     // Verify reCAPTCHA first
     if (!verifyRecaptcha($recaptcha_response)) {
-        $response['message'] = 'reCAPTCHA verification failed. Please try again.';
-        echo json_encode($response);
-        exit;
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'reCAPTCHA Verification Failed',
+                text: 'Please try again.',
+            });
+        </script>";
+        return;
     }
     
     if ($email == '' OR $pass == '') {
-        $response['message'] = 'Email and Password are required!';
-        echo json_encode($response);
-        exit;
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Email and Password are required!',
+            });
+        </script>";
+        return;
     }
 
     $user = new User();
@@ -75,18 +73,33 @@ if(isset($_POST['btnLogin'])){
         $res = User::userAuthentication($email, $pass);
         if ($res == true) {
             $_SESSION['success_message'] = "Login successful!";
-            $response['status'] = 'success';
-            $response['message'] = 'You logged in successfully!';
-            $response['redirect'] = web_root."admin/index.php";
+            echo "<script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'You logged in successfully!',
+                }).then((result) => {
+                    window.location.href = '".web_root."admin/index.php';
+                });
+            </script>";
         } else {
-            $response['message'] = 'Invalid password. Please try again.';
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Password',
+                    text: 'Please try again.',
+                });
+            </script>";
         }
     } else {
-        $response['message'] = 'Account not found. Please check your email address.';
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Account Not Found',
+                text: 'Please check your email address.',
+            });
+        </script>";
     }
-    
-    echo json_encode($response);
-    exit;
 }
 ?>
 
