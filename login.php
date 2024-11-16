@@ -141,7 +141,10 @@ if(isset($_POST['sidebarLogin'])){
 }
 
 
+
 define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
+define('MAX_LOGIN_ATTEMPTS', 3);
+define('LOCKOUT_TIME', 15); // Minutes
 
 function verifyRecaptcha($recaptcha_response) {
     $url = 'https://www.google.com/recaptcha/api/siteverify';
@@ -166,7 +169,6 @@ function verifyRecaptcha($recaptcha_response) {
     return $captcha_success;
 }
 
-
 function containsSqlInjection($str) {
     // Allow common email characters
     $str = preg_replace('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '', $str);
@@ -190,6 +192,41 @@ function logSqlInjectionAttempt($ip_address) {
     $mydb->executeQuery();
 }
 
+function checkLoginAttempts($email) {
+    global $mydb;
+    $mydb->setQuery("SELECT attempts, last_attempt FROM tblcustomer WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
+    $result = $mydb->loadSingleResult();
+    
+    if ($result) {
+        if ($result->attempts >= MAX_LOGIN_ATTEMPTS) {
+            $lockout_time = strtotime($result->last_attempt) + (LOCKOUT_TIME * 60);
+            if (time() < $lockout_time) {
+                $remaining_time = ceil(($lockout_time - time()) / 60);
+                return array(
+                    'locked' => true,
+                    'remaining_time' => $remaining_time
+                );
+            } else {
+                // Reset attempts after lockout period
+                $mydb->setQuery("UPDATE tblcustomer SET attempts = 0, last_attempt = NULL WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
+                $mydb->executeQuery();
+            }
+        }
+    }
+    return array('locked' => false);
+}
+
+function incrementLoginAttempts($email) {
+    global $mydb;
+    $mydb->setQuery("UPDATE tblcustomer SET attempts = COALESCE(attempts, 0) + 1, last_attempt = NOW() WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
+    $mydb->executeQuery();
+}
+
+function resetLoginAttempts($email) {
+    global $mydb;
+    $mydb->setQuery("UPDATE tblcustomer SET attempts = 0, last_attempt = NULL WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
+    $mydb->executeQuery();
+}
 
 header('Content-Type: application/json');
 
@@ -219,14 +256,24 @@ if(isset($_POST['modalLogin'])) {
         exit;
     }
    
-   if ($email == '' OR $upass == '') {
-       echo json_encode([
-           'status' => 'error',
-           'message' => 'Invalid Username and Password!'
-       ]);
-       exit;
-   } else {
-    
+    if ($email == '' OR $upass == '') {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Invalid Username and Password!'
+        ]);
+        exit;
+    }
+
+    // Check if account is locked
+    $attempt_check = checkLoginAttempts($email);
+    if ($attempt_check['locked']) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => "Account is temporarily locked. Please try again in {$attempt_check['remaining_time']} minutes."
+        ]);
+        exit;
+    }
+
     $mydb->setQuery("SELECT * FROM `tblcustomer` WHERE `CUSUNAME` = '" . $mydb->escape_value($email) . "'");
     $cur = $mydb->executeQuery();
 
@@ -241,6 +288,9 @@ if(isset($_POST['modalLogin'])) {
                 ]);
                 exit;
             }
+
+            // Reset login attempts on successful login
+            resetLoginAttempts($email);
 
             $_SESSION['CUSID'] = $customer_data->CUSTOMERID;
             $_SESSION['CUSNAME'] = $customer_data->FNAME . ' ' . $customer_data->LNAME;
@@ -264,9 +314,15 @@ if(isset($_POST['modalLogin'])) {
                 ]);
             }
         } else {
+            // Increment failed login attempts
+            incrementLoginAttempts($email);
+            $attempts_left = MAX_LOGIN_ATTEMPTS - ($customer_data->attempts + 1);
+            
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Invalid Username and Password!'
+                'message' => $attempts_left > 0 ? 
+                    "Invalid Username and Password! {$attempts_left} attempts remaining." : 
+                    "Account has been locked. Please try again in " . LOCKOUT_TIME . " minutes."
             ]);
         }
     } else {
@@ -275,11 +331,10 @@ if(isset($_POST['modalLogin'])) {
             'message' => 'Invalid Username and Password!'
         ]);
     }
-}
 } else {
-echo json_encode([
-    'status' => 'error',
-    'message' => 'Invalid request'
-]);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Invalid request'
+    ]);
 }
 ?>
