@@ -269,7 +269,7 @@ if(isset($_POST['modalLogin'])) {
     if ($attempt_check['locked']) {
         echo json_encode([
             'status' => 'error',
-            'message' => "Your account is temporarily locked. Please try again later."
+            'message' => "Account is temporarily locked. Please try again in {$attempt_check['remaining_time']} minutes."
         ]);
         exit;
     }
@@ -316,10 +316,13 @@ if(isset($_POST['modalLogin'])) {
         } else {
             // Increment failed login attempts
             incrementLoginAttempts($email);
+            $attempts_left = MAX_LOGIN_ATTEMPTS - ($customer_data->attempts + 1);
             
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Invalid Username and Password!'
+                'message' => $attempts_left > 0 ? 
+                    "Invalid Username and Password! {$attempts_left} attempts remaining." : 
+                    "Account has been locked. Please try again in " . LOCKOUT_TIME . " minutes."
             ]);
         }
     } else {
