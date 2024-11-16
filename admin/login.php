@@ -1,4 +1,6 @@
 <?php
+session_start();
+$msg = "";
 
 require_once("../include/initialize.php");
 
@@ -16,6 +18,12 @@ require_once("../include/initialize.php");
 
   }
 
+  ?>
+  <?php 
+  if (isset($_SESSION['success_message'])) {
+    $msg = "<div class='alert alert-success'>" . htmlspecialchars($_SESSION['success_message']) . "</div>";
+    unset($_SESSION['success_message']); // Clear the message after displaying
+}
   ?>
 
 <!DOCTYPE html>
@@ -161,6 +169,7 @@ require_once("../include/initialize.php");
     <div class="logo-container">
             <img src="win.png" alt="Windale Hardware Store Logo">
         </div>
+        <?php echo $msg; ?>
 <div class="inputgroup">
         <label for="email" >Email</label>
         <input type="email" name="user_email" placeholder="Email">
