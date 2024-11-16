@@ -237,7 +237,7 @@ if (isset($_POST['btnLogin'])) {
                         // Submit form via fetch
                         const formData = new FormData(document.getElementById('loginForm'));
 
-                        fetch('login.php', {
+                        fetch('login-handler.php', {
                             method: 'POST',
                             body: formData
                         })
