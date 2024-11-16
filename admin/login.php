@@ -280,9 +280,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p class="text-end" style="float:right;"><a href="choose-forgotpass.php" class="p">Forgot Password?</p>
         <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
         <button type="submit" name="btnLogin">Log In</button>
-        <div class="social">
+        <!-- <div class="social">
         <a href="../index.php" class="text-dark text-end text-decoration-none">Back to Home Page</a>
-        </div>
+        </div> -->
     </form>
     <script>
     document.getElementById('loginForm').addEventListener('submit', function(e) {
