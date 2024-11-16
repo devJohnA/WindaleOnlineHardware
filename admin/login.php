@@ -271,20 +271,55 @@ if(isset($_POST['btnLogin'])){
         
         grecaptcha.ready(function() {
             grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
-            .then(function(token) {
-                document.getElementById('recaptchaResponse').value = token;
-                document.getElementById('loginForm').submit();
-            })
-            .catch(function(error) {
-                console.error('reCAPTCHA error:', error);
+                .then(function(token) {
+                    document.getElementById('recaptchaResponse').value = token;
+                    submitForm();
+                })
+                .catch(function(error) {
+                    console.error('reCAPTCHA error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to verify reCAPTCHA. Please try again.',
+                    });
+                });
+        });
+    });
+
+    function submitForm() {
+        const formData = new FormData(document.getElementById('loginForm'));
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message,
+                }).then(() => {
+                    window.location.href = data.redirect;
+                });
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'reCAPTCHA verification failed. Please try again.',
+                    text: data.message,
                 });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred. Please try again.',
             });
         });
-    });
+    }
     </script>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
