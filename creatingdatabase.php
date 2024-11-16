@@ -4,7 +4,6 @@ $servername = "localhost";
 $username = "u510162695_dried"; 
 $password = "1Dried_password"; 
 $dbname = "u510162695_dried"; 
-
 // Create a new MySQLi connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
