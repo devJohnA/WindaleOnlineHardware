@@ -38,58 +38,6 @@ require_once("../include/initialize.php");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            <script src="https://www.google.com/recaptcha/api.js?render=YOUR_SITE_KEY"></script>
-    <script>
-        // Handle form submission
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
-            
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Execute reCAPTCHA
-                grecaptcha.execute('YOUR_SITE_KEY', {action: 'login'})
-                    .then(function(token) {
-                        // Add token to hidden input
-                        document.getElementById('recaptcha_token').value = token;
-                        
-                        // Submit the form
-                        submitForm();
-                    });
-            });
-        });
-
-        function submitForm() {
-            const formData = new FormData(document.getElementById('loginForm'));
-            
-            fetch('verify_recaptcha.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // If reCAPTCHA verification successful, proceed with login
-                    document.getElementById('loginForm').submit();
-                } else {
-                    // If verification fails
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Verification Failed',
-                        text: 'Please try again later.',
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred. Please try again.',
-                });
-            });
-        }
-    </script>
             
     <style media="screen">
          *,
@@ -230,15 +178,102 @@ require_once("../include/initialize.php");
         <label for="password">Password</label>
         <input type="password" name="user_pass" id="password" placeholder="Password">
       </div>
-      <input type="hidden" name="recaptcha_token" id="recaptcha_token">
-        
         <p class="text-end" style="float:right;"><a href="choose-forgotpass.php" class="p">Forgot Password?</p>
         <button type="submit" name="btnLogin">Log In</button>
         <div class="social">
         <a href="../index.php" class="text-dark text-end text-decoration-none">Back to Home Page</a>
         </div>
     </form>
+    <?php 
+function containsSqlInjection($str) {
+  // Allow common email characters
+  $str = preg_replace('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '', $str);
 
+  $sql_regexes = array(
+      "/(\s|'|\"|=|<|>|\(|\)|\{|\}|;|--|\^|\/\*|\*\/|!\d+|_|\%|\\\\)/i",
+      "/(union\s+select|select\s+from|insert\s+into|delete\s+from|update\s+set|drop\s+table)/i"
+  );
+  
+  foreach ($sql_regexes as $regex) {
+      if (preg_match($regex, $str)) {
+          return true;
+      }
+  }
+  return false;
+}
+
+if(isset($_POST['btnLogin'])){
+  $username = trim($_POST['user_email']);
+  $upass = trim($_POST['user_pass']);
+  
+  if (containsSqlInjection($username) || containsSqlInjection($upass)) {
+    echo "<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Security Breach Detected',
+        html: '<div style=\"font-size: 1.2em;\">🚨 WARNING: SQL Injection Attempt Detected 🚨</div><br>' +
+              '<p>Your IP address has been logged and reported to cybersecurity authorities.</p>' +
+              '<p>Further attempts will result in immediate account lockout and potential legal action.</p>' +
+              '<br><div style=\"font-size: 1.1em; color: #ff0000;\">This incident will be investigated thoroughly.</div>',
+        confirmButtonText: 'I Understand the Consequences',
+        confirmButtonColor: '#d33',
+        showCancelButton: false,
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'login.php';
+        }
+    });
+</script>";
+      exit();
+  }
+  
+  if ($username == '' OR $upass == '') {
+      echo "<script>
+          Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Username and Password are required!',
+          })
+      </script>";
+  } else {  
+    $user = new User();
+
+    if (User::checkUsernameExists($username)) {
+        $res = User::userAuthentication($username, $upass);
+          
+          if ($res == true) { 
+              echo "<script>
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Success!',
+                      text: 'You login as ".$_SESSION['U_ROLE'].".',
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          window.location.href = '".($_SESSION['U_ROLE']=='Administrator' ? web_root."admin/index.php" : web_root."admin/login.php")."';
+                      }
+                  })
+              </script>";
+          } else {
+              echo "<script>
+                  Swal.fire({
+                      title: 'Oops...',
+                      html: '<div style=\"font-size: 3em;\">😢</div><p>Invalid Password. Please try again!</p>',
+                  })
+              </script>";
+          }
+      } else {
+          echo "<script>
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Account does not exist. Please check your username.',
+              })
+          </script>";
+      }
+  }
+} 
+?>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
