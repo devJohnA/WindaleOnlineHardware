@@ -1,6 +1,7 @@
 <?php
 session_start();
-$msg = "";
+header('Content-Type: application/json'); // Set JSON response header
+$response = ['status' => 'error', 'message' => '', 'redirect' => ''];
 
 require_once("../include/initialize.php");
 
@@ -36,7 +37,10 @@ function verifyRecaptcha($recaptcha_response) {
 }
 
 if(isset($_SESSION['USERID'])){
-    redirect(web_root."admin/index.php");
+    $response['status'] = 'success';
+    $response['redirect'] = web_root."admin/index.php";
+    echo json_encode($response);
+    exit;
 }
 
 if(isset($_POST['btnLogin'])){
@@ -46,25 +50,15 @@ if(isset($_POST['btnLogin'])){
 
     // Verify reCAPTCHA first
     if (!verifyRecaptcha($recaptcha_response)) {
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'reCAPTCHA Verification Failed',
-                text: 'Please try again.',
-            });
-        </script>";
-        return;
+        $response['message'] = 'reCAPTCHA verification failed. Please try again.';
+        echo json_encode($response);
+        exit;
     }
     
     if ($email == '' OR $pass == '') {
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Email and Password are required!',
-            });
-        </script>";
-        return;
+        $response['message'] = 'Email and Password are required!';
+        echo json_encode($response);
+        exit;
     }
 
     $user = new User();
@@ -73,33 +67,25 @@ if(isset($_POST['btnLogin'])){
         $res = User::userAuthentication($email, $pass);
         if ($res == true) {
             $_SESSION['success_message'] = "Login successful!";
-            echo "<script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'You logged in successfully!',
-                }).then((result) => {
-                    window.location.href = '".web_root."admin/index.php';
-                });
-            </script>";
+            $response['status'] = 'success';
+            $response['message'] = 'You logged in successfully!';
+            $response['redirect'] = web_root."admin/index.php";
         } else {
-            echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Password',
-                    text: 'Please try again.',
-                });
-            </script>";
+            $response['message'] = 'Invalid password. Please try again.';
         }
     } else {
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Account Not Found',
-                text: 'Please check your email address.',
-            });
-        </script>";
+        $response['message'] = 'Account not found. Please check your email address.';
     }
+    
+    echo json_encode($response);
+    exit;
+}
+
+// If it's not a POST request, return an error
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $response['message'] = 'Invalid request method';
+    echo json_encode($response);
+    exit;
 }
 ?>
 
@@ -267,59 +253,64 @@ if(isset($_POST['btnLogin'])){
     </form>
     <script>
     document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        grecaptcha.ready(function() {
-            grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
-                .then(function(token) {
-                    document.getElementById('recaptchaResponse').value = token;
-                    submitForm();
-                })
-                .catch(function(error) {
-                    console.error('reCAPTCHA error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to verify reCAPTCHA. Please try again.',
-                    });
-                });
-        });
-    });
-
-    function submitForm() {
-        const formData = new FormData(document.getElementById('loginForm'));
-        
-        fetch(window.location.href, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: data.message,
-                }).then(() => {
-                    window.location.href = data.redirect;
-                });
-            } else {
+    e.preventDefault();
+    
+    grecaptcha.ready(function() {
+        grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
+            .then(function(token) {
+                document.getElementById('recaptchaResponse').value = token;
+                submitForm();
+            })
+            .catch(function(error) {
+                console.error('reCAPTCHA error:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: data.message,
+                    text: 'Failed to verify reCAPTCHA. Please try again.',
                 });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+            });
+    });
+});
+
+function submitForm() {
+    const formData = new FormData(document.getElementById('loginForm'));
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+            }).then(() => {
+                window.location.href = data.redirect;
+            });
+        } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'An unexpected error occurred. Please try again.',
+                text: data.message || 'An unexpected error occurred. Please try again.',
             });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred. Please try again.',
         });
-    }
+    });
+}
     </script>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
