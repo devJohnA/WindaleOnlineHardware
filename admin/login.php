@@ -35,12 +35,30 @@ function verifyRecaptcha($recaptcha_response) {
     return $result && $result->success;
 }
 
-if(isset($_SESSION['USERID'])){
-    redirect(web_root."admin/index.php");
+if (isset($_SESSION['USERID'])) {
+    redirect(web_root . "admin/index.php");
+}
+
+// Initialize or retrieve login attempt session variables
+if (!isset($_SESSION['login_attempts'])) {
+    $_SESSION['login_attempts'] = 0;
+}
+if (!isset($_SESSION['lockout_time'])) {
+    $_SESSION['lockout_time'] = 0;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
+
+    // Check if the user is locked out
+    if ($_SESSION['login_attempts'] >= 3 && time() < $_SESSION['lockout_time']) {
+        $remaining_time = $_SESSION['lockout_time'] - time();
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Too many failed attempts. Please try again after ' . $remaining_time . ' seconds.'
+        ]);
+        exit;
+    }
 
     $email = trim($_POST['user_email']);
     $pass = trim($_POST['user_pass']);
@@ -67,18 +85,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (User::checkUsernameExists($email)) {
         $res = User::userAuthentication($email, $pass);
         if ($res === true) {
+            // Reset login attempts on successful login
+            $_SESSION['login_attempts'] = 0;
+
             echo json_encode([
                 'status' => 'success',
                 'message' => 'You logged in successfully!',
                 'redirect' => web_root . "admin/index.php"
             ]);
         } else {
+            // Increment login attempts on failure
+            $_SESSION['login_attempts']++;
+            if ($_SESSION['login_attempts'] >= 3) {
+                $_SESSION['lockout_time'] = time() + 60; // Lockout for 1 minute
+            }
+
             echo json_encode([
                 'status' => 'error',
                 'message' => 'Invalid password. Please try again.'
             ]);
         }
     } else {
+        // Increment login attempts on failure
+        $_SESSION['login_attempts']++;
+        if ($_SESSION['login_attempts'] >= 3) {
+            $_SESSION['lockout_time'] = time() + 60; // Lockout for 1 minute
+        }
+
         echo json_encode([
             'status' => 'error',
             'message' => 'Account not found. Please check your email address.'
@@ -87,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
+
 
 
 <!DOCTYPE html>
