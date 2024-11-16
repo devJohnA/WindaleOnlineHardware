@@ -1,31 +1,22 @@
 <?php
-// Database connection variables
-$servername = "localhost";
-$username = "u510162695_dried";
-$password = "1Dried_password";
-$dbname = "u510162695_dried";
 
-// Create connection
+$servername = "localhost";
+$username = "u510162695_dried"; 
+$password = "1Dried_password"; 
+$dbname = "u510162695_dried"; 
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// SQL query to create a new table
-$sql = "CREATE TABLE `tbl_recaptcha_logs` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `ip_address` VARCHAR(45),
-    `score` FLOAT,
-    `attempt_date` DATETIME
-)";
+$sql = "DROP TABLE IF EXISTS tblcustomer";
 
-// Execute the query
 if ($conn->query($sql) === TRUE) {
-    echo "Table 'ExampleTable' created successfully";
+    echo "Table tblcustomer was successfully dropped.";
 } else {
-    echo "Error creating table: " . $conn->error;
+    echo "Error dropping table: " . $conn->error;
 }
 
 // Close connection
