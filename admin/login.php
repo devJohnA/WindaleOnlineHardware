@@ -247,7 +247,7 @@ if(isset($_POST['btnLogin'])){
     <div class="background">
         <div class="shape"></div>
     </div>
-    <form method="post" action="" role="login" >
+    <form method="post" id="loginForm" action="" role="login" >
     <div class="logo-container">
             <img src="win.png" alt="Windale Hardware Store Logo">
         </div>
