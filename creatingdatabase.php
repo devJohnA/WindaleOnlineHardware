@@ -13,7 +13,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-echo "Connected successfully!<br>";  // Debugging line to ensure connection works
 
 // SQL query to add the OTP and OTP_TIMESTAMP columns to tbluseraccount
 $sql = "ALTER TABLE `tbluseraccount`
