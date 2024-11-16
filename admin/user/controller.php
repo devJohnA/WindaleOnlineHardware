@@ -54,62 +54,48 @@ switch ($action) {
 
    
 
-	function doInsert(){
-
-		if(isset($_POST['save'])){
-
-
-
-
-
-		if ($_POST['U_NAME'] == "" OR $_POST['U_USERNAME'] == "" OR $_POST['U_PASS'] == "") {
-
-			$messageStats = false;
-
-			message("All field is required!","error");
-
-			redirect('index.php?view=add');
-
-		}else{	
-
-			$user = New User();
-
-			// $user->USERID 		= $_POST['user_id'];
-
-			$user->U_NAME 		= $_POST['U_NAME'];
-
-			$user->U_USERNAME		= $_POST['U_USERNAME'];
-
-			$user->U_CON		= $_POST['U_CON'];
-
-			// $user->U_EMAIL		= $_POST['U_EMAIL'];
-
-			$user->U_PASS			=sha1($_POST['U_PASS']);
-
-			$user->U_ROLE			=  $_POST['U_ROLE'];
-
-			$user->create();
-
-
-
-						// $autonum = New Autonumber(); 
-
-						// $autonum->auto_update(2);
-
-
-  // Assume the save was successful, set a session variable
-  $_SESSION['success'] = "New user added successfully!";
-    
-			redirect("index.php");
-
-			
-
+	function doInsert() {
+		if(isset($_POST['save'])) {
+			if ($_POST['U_NAME'] == "" OR $_POST['U_USERNAME'] == "" OR $_POST['U_PASS'] == "") {
+				$messageStats = false;
+				message("All fields are required!", "error");
+				redirect('index.php?view=add');
+			} else {
+				// Initialize Google Authenticator
+				$gAuth = new GoogleAuthenticator();
+				$secretKey = $gAuth->generateSecret();
+				
+				// Generate QR Code URL
+				$qrCodeUrl = GoogleQrUrl::generate(
+					$_POST['U_USERNAME'],
+					$secretKey,
+					'Windale Hardware'
+				);
+				
+				$user = New User();
+				$user->U_NAME = $_POST['U_NAME'];
+				$user->U_USERNAME = $_POST['U_USERNAME'];
+				$user->U_CON = $_POST['U_CON'];
+				$user->U_PASS = password_hash($_POST['U_PASS'], PASSWORD_DEFAULT);
+				$user->U_ROLE = $_POST['U_ROLE'];
+				$user->SECRET_KEY = $secretKey; // Add this field to your database
+				
+				if($user->create()) {
+					$_SESSION['success'] = "New user added successfully! Please configure 2FA.";
+					// Return QR code URL and secret key as JSON
+					header('Content-Type: application/json');
+					echo json_encode([
+						'success' => true,
+						'qrCodeUrl' => $qrCodeUrl,
+						'secretKey' => $secretKey
+					]);
+					exit;
+				} else {
+					message("Error creating user!", "error");
+					redirect('index.php?view=add');
+				}
+			}
 		}
-
-		}
-
-
-
 	}
 
 

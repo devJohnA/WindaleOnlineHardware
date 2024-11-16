@@ -227,11 +227,10 @@ if(isset($_POST['btnLogin'])){
           })
       </script>";
   } else {  
-      $user = new User();
-      $h_upass = sha1($upass);
-      
-      if (User::checkUsernameExists($username)) {
-          $res = User::userAuthentication($username, $h_upass);
+    $user = new User();
+
+    if (User::checkUsernameExists($username)) {
+        $res = User::userAuthentication($username, $upass);
           
           if ($res == true) { 
               echo "<script>
