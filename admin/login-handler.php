@@ -49,6 +49,11 @@ function sendJsonResponse($status, $message, $redirect = null) {
     exit;
 }
 
+// Check if it's a POST request
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    sendJsonResponse('error', 'Invalid request method');
+}
+
 // Handle login
 if(isset($_POST['btnLogin'])){
     $email = trim($_POST['user_email']);
@@ -79,6 +84,6 @@ if(isset($_POST['btnLogin'])){
     }
 }
 
-// If it's not a POST request, return an error
-sendJsonResponse('error', 'Invalid request method');
+// If we get here, it means it's a POST request but btnLogin wasn't set
+sendJsonResponse('error', 'Invalid form submission');
 ?>

@@ -170,54 +170,60 @@ if(isset($_SESSION['USERID'])){
         </div>
     </form>
     <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        grecaptcha.ready(function() {
-            grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
-                .then(function(token) {
-                    document.getElementById('recaptchaResponse').value = token;
-                    submitForm();
-                })
-                .catch(function(error) {
-                    console.error('reCAPTCHA error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to verify reCAPTCHA. Please try again.',
-                    });
+   document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    grecaptcha.ready(function() {
+        grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
+            .then(function(token) {
+                document.getElementById('recaptchaResponse').value = token;
+                submitForm();
+            })
+            .catch(function(error) {
+                console.error('reCAPTCHA error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to verify reCAPTCHA. Please try again.',
                 });
+            });
+    });
+});
+
+function submitForm() {
+    const formData = new FormData(document.getElementById('loginForm'));
+    
+    // Make sure this path matches your actual file structure
+    fetch('login-handler.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        Swal.fire({
+            icon: data.status,
+            title: data.status === 'success' ? 'Success!' : 'Error',
+            text: data.message,
+        }).then(() => {
+            if (data.status === 'success' && data.redirect) {
+                window.location.href = data.redirect;
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred. Please try again.',
         });
     });
-
-    function submitForm() {
-        const formData = new FormData(document.getElementById('loginForm'));
-        
-        fetch('login-handler.php', {  // Update this to point to your handler file
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            Swal.fire({
-                icon: data.status,
-                title: data.status === 'success' ? 'Success!' : 'Error',
-                text: data.message,
-            }).then(() => {
-                if (data.status === 'success' && data.redirect) {
-                    window.location.href = data.redirect;
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An unexpected error occurred. Please try again.',
-            });
-        });
-    }
+}
     </script>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
