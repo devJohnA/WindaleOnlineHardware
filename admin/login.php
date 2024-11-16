@@ -4,106 +4,105 @@ $msg = "";
 
 require_once("../include/initialize.php");
 
-// Add reCAPTCHA secret key
+// Add reCAPTCHA keys
 define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
 define('RECAPTCHA_SITE_KEY', '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA');
 
 // Function to verify reCAPTCHA
 function verifyRecaptcha($recaptcha_response) {
     if (empty($recaptcha_response)) {
-        return (object)['success' => false, 'score' => 0];
+        return false;
     }
 
-    try {
-        $url = 'https://www.google.com/recaptcha/api/siteverify';
-        $data = array(
-            'secret' => RECAPTCHA_SECRET_KEY,
-            'response' => $recaptcha_response
-        );
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $data = [
+        'secret' => RECAPTCHA_SECRET_KEY,
+        'response' => $recaptcha_response
+    ];
 
-        $options = array(
-            'http' => array(
-                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method' => 'POST',
-                'content' => http_build_query($data)
-            )
-        );
+    $options = [
+        'http' => [
+            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method' => 'POST',
+            'content' => http_build_query($data)
+        ]
+    ];
 
-        $context = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-        
-        if ($result === FALSE) { 
-            error_log("reCAPTCHA verification failed to connect");
-            return (object)['success' => false, 'score' => 0];
-        }
-        
-        return json_decode($result);
-    } catch (Exception $e) {
-        error_log("reCAPTCHA verification error: " . $e->getMessage());
-        return (object)['success' => false, 'score' => 0];
-    }
+    $context = stream_context_create($options);
+    $response = file_get_contents($url, false, $context);
+    $result = json_decode($response);
+
+    return $result && $result->success;
 }
 
 if(isset($_SESSION['USERID'])){
     redirect(web_root."admin/index.php");
 }
 
-// Handle form submission
 if(isset($_POST['btnLogin'])){
-    $username = trim($_POST['user_email']);
-    $upass = trim($_POST['user_pass']);
+    $email = trim($_POST['user_email']);
+    $pass = trim($_POST['user_pass']);
     $recaptcha_response = $_POST['recaptcha_response'] ?? '';
-    
-    // First verify reCAPTCHA
-    $recaptcha = verifyRecaptcha($recaptcha_response);
-    
-    if (!$recaptcha->success) {
-        echo json_encode(['status' => 'error', 'message' => 'reCAPTCHA verification failed']);
-        exit;
+
+    // Verify reCAPTCHA first
+    if (!verifyRecaptcha($recaptcha_response)) {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'reCAPTCHA Verification Failed',
+                text: 'Please try again.',
+            });
+        </script>";
+        return;
     }
     
-    // Check for empty fields
-    if ($username == '' OR $upass == '') {
-        echo json_encode(['status' => 'error', 'message' => 'Username and Password are required!']);
-        exit;
+    if ($email == '' OR $pass == '') {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Email and Password are required!',
+            });
+        </script>";
+        return;
     }
-    
-    // Your existing login logic
-    if (containsSqlInjection($username) || containsSqlInjection($upass)) {
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Security breach detected'
-        ]);
-        exit;
-    }
-    
+
     $user = new User();
     
-    if (User::checkUsernameExists($username)) {
-        $res = User::userAuthentication($username, $upass);
+    if (User::checkUsernameExists($email)) {
+        $res = User::userAuthentication($email, $pass);
         if ($res == true) {
-            echo json_encode([
-                'status' => 'success',
-                'message' => 'Login successful',
-                'redirect' => $_SESSION['U_ROLE'] == 'Administrator' ? 
-                    web_root."admin/index.php" : 
-                    web_root."admin/login.php"
-            ]);
+            $_SESSION['success_message'] = "Login successful!";
+            echo "<script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'You logged in successfully!',
+                }).then((result) => {
+                    window.location.href = '".web_root."admin/index.php';
+                });
+            </script>";
         } else {
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Invalid Password. Please try again!'
-            ]);
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Password',
+                    text: 'Please try again.',
+                });
+            </script>";
         }
     } else {
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Account does not exist. Please check your username.'
-        ]);
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Account Not Found',
+                text: 'Please check your email address.',
+            });
+        </script>";
     }
-    exit;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -247,7 +246,7 @@ if(isset($_POST['btnLogin'])){
     <div class="background">
         <div class="shape"></div>
     </div>
-    <form method="post" id="loginForm" action="" role="login" >
+    <form method="POST" id="loginForm">
     <div class="logo-container">
             <img src="win.png" alt="Windale Hardware Store Logo">
         </div>
@@ -272,55 +271,20 @@ if(isset($_POST['btnLogin'])){
         
         grecaptcha.ready(function() {
             grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
-                .then(function(token) {
-                    document.getElementById('recaptchaResponse').value = token;
-                    submitForm();
-                })
-                .catch(function(error) {
-                    console.error('reCAPTCHA error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to verify reCAPTCHA. Please try again.',
-                    });
-                });
-        });
-    });
-
-    function submitForm() {
-        const formData = new FormData(document.getElementById('loginForm'));
-        
-        fetch(window.location.href, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: data.message,
-                }).then(() => {
-                    window.location.href = data.redirect;
-                });
-            } else {
+            .then(function(token) {
+                document.getElementById('recaptchaResponse').value = token;
+                document.getElementById('loginForm').submit();
+            })
+            .catch(function(error) {
+                console.error('reCAPTCHA error:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: data.message,
+                    text: 'reCAPTCHA verification failed. Please try again.',
                 });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An unexpected error occurred. Please try again.',
             });
         });
-    }
+    });
     </script>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
