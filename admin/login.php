@@ -1,9 +1,14 @@
 <?php
 session_start();
+$msg = "";
+
 require_once("../include/initialize.php");
 
+// Add reCAPTCHA keys
 define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
+define('RECAPTCHA_SITE_KEY', '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA');
 
+// Function to verify reCAPTCHA
 function verifyRecaptcha($recaptcha_response) {
     if (empty($recaptcha_response)) {
         return false;
@@ -12,14 +17,14 @@ function verifyRecaptcha($recaptcha_response) {
     $url = 'https://www.google.com/recaptcha/api/siteverify';
     $data = [
         'secret' => RECAPTCHA_SECRET_KEY,
-        'response' => $recaptcha_response,
+        'response' => $recaptcha_response
     ];
 
     $options = [
         'http' => [
             'header' => "Content-type: application/x-www-form-urlencoded\r\n",
             'method' => 'POST',
-            'content' => http_build_query($data),
+            'content' => http_build_query($data)
         ]
     ];
 
@@ -30,38 +35,73 @@ function verifyRecaptcha($recaptcha_response) {
     return $result && $result->success;
 }
 
-if (isset($_POST['btnLogin'])) {
+if(isset($_SESSION['USERID'])){
+    redirect(web_root."admin/index.php");
+}
+
+if(isset($_POST['btnLogin'])){
     $email = trim($_POST['user_email']);
     $pass = trim($_POST['user_pass']);
     $recaptcha_response = $_POST['recaptcha_response'] ?? '';
 
-    // Verify reCAPTCHA
+    // Verify reCAPTCHA first
     if (!verifyRecaptcha($recaptcha_response)) {
-        echo json_encode(['status' => 'error', 'message' => 'reCAPTCHA verification failed.']);
-        exit;
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'reCAPTCHA Verification Failed',
+                text: 'Please try again.',
+            });
+        </script>";
+        return;
     }
-
-    if ($email == '' || $pass == '') {
-        echo json_encode(['status' => 'error', 'message' => 'Email and Password are required.']);
-        exit;
+    
+    if ($email == '' OR $pass == '') {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Email and Password are required!',
+            });
+        </script>";
+        return;
     }
 
     $user = new User();
+    
     if (User::checkUsernameExists($email)) {
         $res = User::userAuthentication($email, $pass);
-        if ($res) {
+        if ($res == true) {
             $_SESSION['success_message'] = "Login successful!";
-            echo json_encode(['status' => 'success', 'message' => 'Login successful!', 'redirect' => web_root . "admin/index.php"]);
+            echo "<script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'You logged in successfully!',
+                }).then((result) => {
+                    window.location.href = '".web_root."admin/index.php';
+                });
+            </script>";
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid password. Please try again.']);
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Password',
+                    text: 'Please try again.',
+                });
+            </script>";
         }
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Account not found. Please check your email address.']);
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Account Not Found',
+                text: 'Please check your email address.',
+            });
+        </script>";
     }
-    exit;
 }
 ?>
-
 
 
 <!DOCTYPE html>
@@ -226,50 +266,65 @@ if (isset($_POST['btnLogin'])) {
         </div>
     </form>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            grecaptcha.ready(function () {
-                grecaptcha.execute('6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA', { action: 'login' })
-                    .then(function (token) {
-                        document.getElementById('recaptchaResponse').value = token;
-
-                        // Submit form via fetch
-                        const formData = new FormData(document.getElementById('loginForm'));
-
-                        fetch('login-handler.php', {
-                            method: 'POST',
-                            body: formData
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.status === 'success') {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Success!',
-                                        text: data.message,
-                                    }).then(() => {
-                                        window.location.href = data.redirect;
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: data.message || 'An unexpected error occurred.',
-                                    });
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'A network error occurred. Please try again later.',
-                                });
-                            });
-                    });
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    grecaptcha.ready(function() {
+        grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
+            .then(function(token) {
+                document.getElementById('recaptchaResponse').value = token;
+                submitForm();
+            })
+            .catch(function(error) {
+                console.error('reCAPTCHA error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to verify reCAPTCHA. Please try again.',
+                });
             });
+    });
+});
+
+function submitForm() {
+    const formData = new FormData(document.getElementById('loginForm'));
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+            }).then(() => {
+                window.location.href = data.redirect;
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'An unexpected error occurred. Please try again.',
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred. Please try again.',
         });
+    });
+}
     </script>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
