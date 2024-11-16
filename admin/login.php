@@ -168,7 +168,7 @@ require_once("../include/initialize.php");
         <label for="password">Password</label>
         <input type="password" name="user_pass" id="password" placeholder="Password">
       </div>
-        <p class="text-end" style="float:right;"><a href="forgot-password.php" class="p">Forgot Password?</p>
+        <p class="text-end" style="float:right;"><a href="choose-forgotpass.php" class="p">Forgot Password?</p>
         <button type="submit" name="btnLogin">Log In</button>
         <div class="social">
         <a href="../index.php" class="text-dark text-end text-decoration-none">Back to Home Page</a>

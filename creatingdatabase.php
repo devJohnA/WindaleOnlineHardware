@@ -3,24 +3,26 @@
 $servername = "localhost";
 $username = "u510162695_dried"; 
 $password = "1Dried_password"; 
-$dbname = "u510162695_dried";
+$dbname = "u510162695_dried"; 
 
-// Create a connection
+// Create a new MySQLi connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check the connection
+// Check if the connection was successful
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// SQL query to add the SECRET_KEY column
-$sql = "ALTER TABLE tbluseraccount ADD COLUMN SECRET_KEY varchar(255) NOT NULL;";
+// SQL query to add the OTP and OTP_TIMESTAMP columns to tbluseraccount
+$sql = "ALTER TABLE `tbluseraccount`
+    ADD COLUMN `OTP` varchar(6) DEFAULT NULL, 
+    ADD COLUMN `OTP_TIMESTAMP` timestamp NULL DEFAULT NULL;";
 
-// Execute the query to add the column
+// Execute the query
 if ($conn->query($sql) === TRUE) {
-    echo "Column 'SECRET_KEY' added successfully!";
+    echo "Columns added successfully to tbluseraccount";
 } else {
-    echo "Error adding column: " . $conn->error;
+    echo "Error: " . $sql . "<br>" . $conn->error;
 }
 
 // Close the connection
