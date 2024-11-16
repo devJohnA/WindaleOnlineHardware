@@ -1,6 +1,5 @@
 <?php
 session_start();
-header('Content-Type: application/json'); // Set JSON response header
 $msg = "";
 
 require_once("../include/initialize.php");
@@ -34,59 +33,6 @@ function verifyRecaptcha($recaptcha_response) {
     $result = json_decode($response);
 
     return $result && $result->success;
-}
-
-// Function to send JSON response
-function sendJsonResponse($status, $message, $redirect = null) {
-    $response = [
-        'status' => $status,
-        'message' => $message
-    ];
-    
-    if ($redirect) {
-        $response['redirect'] = $redirect;
-    }
-    
-    echo json_encode($response);
-    exit;
-}
-
-if(isset($_SESSION['USERID'])){
-    sendJsonResponse('success', 'Already logged in', web_root."admin/index.php");
-}
-
-if(isset($_POST['btnLogin'])){
-    $email = trim($_POST['user_email']);
-    $pass = trim($_POST['user_pass']);
-    $recaptcha_response = $_POST['recaptcha_response'] ?? '';
-
-    // Verify reCAPTCHA first
-    if (!verifyRecaptcha($recaptcha_response)) {
-        sendJsonResponse('error', 'reCAPTCHA verification failed');
-    }
-    
-    if ($email == '' OR $pass == '') {
-        sendJsonResponse('error', 'Email and Password are required!');
-    }
-
-    $user = new User();
-    
-    if (User::checkUsernameExists($email)) {
-        $res = User::userAuthentication($email, $pass);
-        if ($res == true) {
-            $_SESSION['success_message'] = "Login successful!";
-            sendJsonResponse('success', 'You logged in successfully!', web_root."admin/index.php");
-        } else {
-            sendJsonResponse('error', 'Invalid password. Please try again.');
-        }
-    } else {
-        sendJsonResponse('error', 'Account not found. Please check your email address.');
-    }
-}
-
-// If it's not a POST request, return an error
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    sendJsonResponse('error', 'Invalid request method');
 }
 
 if(isset($_SESSION['USERID'])){
