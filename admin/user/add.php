@@ -38,7 +38,7 @@
                         </select>
                     </div>
                     
-                    <div id="qrCodeContainer" style="display: none;" class="col-12 text-center">
+                    <div id="qrCodeContainer" style="display: none;" class="col-12 text-center mt-3">
                         <h6>Scan this QR code with Google Authenticator</h6>
                         <div id="qrCode"></div>
                         <p class="mt-2">Please save this backup code: <strong><span id="backupCode"></span></strong></p>
@@ -46,7 +46,8 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" name="save" class="btn btn-primary">Save</button>
+                        <button type="button" id="generateQRBtn" class="btn btn-info">Generate QR Code</button>
+                        <button type="submit" id="saveUserBtn" name="save" class="btn btn-primary" style="display: none;">Save User</button>
                     </div>
                 </form>
             </div>
@@ -55,28 +56,29 @@
 </div>
 
 <script>
-document.querySelector('#addUserForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+
+
+// Generate QR Code button handler
+document.getElementById('generateQRBtn').addEventListener('click', function() {
+    const form = document.querySelector('#addUserForm');
     
-    // Show loading state
-    const submitButton = this.querySelector('button[type="submit"]');
-    const originalButtonText = submitButton.innerHTML;
-    submitButton.disabled = true;
-    submitButton.innerHTML = 'Processing...';
+    // Check form validity
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
     
-    const formData = new FormData(this);
-    formData.append('save', 'true'); // Add the 'save' parameter expected by PHP
+    const formData = new FormData(form);
+    formData.append('generate_qr', 'true');
     
-    fetch('controller.php?action=add', {
+    this.disabled = true;
+    this.textContent = 'Generating...';
+    
+    fetch('controller.php?action=generate_qr', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
             // Show QR code container
@@ -90,10 +92,6 @@ document.querySelector('#addUserForm').addEventListener('submit', function(e) {
                 qrContainer.innerHTML = '';
                 qrContainer.appendChild(qrImg);
             };
-            qrImg.onerror = function() {
-                console.error('Failed to load QR code image');
-                alert('Failed to load QR code. Please try again or contact support.');
-            };
             qrImg.src = data.qrCodeUrl;
             qrImg.alt = 'QR Code';
             qrImg.className = 'img-fluid';
@@ -101,23 +99,133 @@ document.querySelector('#addUserForm').addEventListener('submit', function(e) {
             // Show backup code
             document.getElementById('backupCode').textContent = data.secretKey;
             
-            // Disable form inputs
-            this.querySelectorAll('input, select').forEach(input => input.disabled = true);
+            // Show save button and hide generate button
+            document.getElementById('generateQRBtn').style.display = 'none';
+            document.getElementById('saveUserBtn').style.display = 'block';
             
-            // Show success message
-            alert("User added successfully. Please scan the QR code in your authenticator app.");
+            // Store the secret key for final submission
+            form.querySelector('input[name="secret_key"]') || 
+                form.insertAdjacentHTML('beforeend', 
+                    `<input type="hidden" name="secret_key" value="${data.secretKey}">`);
         } else {
-            alert(data.message || 'An error occurred while creating the user.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Failed to generate QR code'
+            });
+            this.disabled = false;
+            this.textContent = 'Generate QR Code';
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while processing your request. Please try again.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while generating the QR code'
+        });
+        this.disabled = false;
+        this.textContent = 'Generate QR Code';
+    });
+});
+
+// Save User form handler
+document.querySelector('#addUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const saveButton = document.getElementById('saveUserBtn');
+    const modal = document.getElementById('addUserModal');
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving...';
+    
+    const formData = new FormData(this);
+    formData.append('save', 'true');
+    
+    fetch('controller.php?action=add', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // First hide the modal
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+            
+            // Reset the form
+            resetFormAndModal();
+            
+            // Then show the success message
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: data.message
+                }).then((result) => {
+                    // Refresh the page
+                    window.location.reload();
+                });
+            }, 500);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Failed to add user'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while saving the user'
+        });
     })
     .finally(() => {
-        // Reset button state
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalButtonText;
+        saveButton.disabled = false;
+        saveButton.textContent = 'Save User';
     });
+});
+
+// Function to reset form and modal state
+function resetFormAndModal() {
+    const form = document.querySelector('#addUserForm');
+    const qrCodeContainer = document.getElementById('qrCodeContainer');
+    const qrCode = document.getElementById('qrCode');
+    const generateQRBtn = document.getElementById('generateQRBtn');
+    const saveUserBtn = document.getElementById('saveUserBtn');
+    
+    // Reset form
+    form.reset();
+    
+    // Enable all form inputs
+    form.querySelectorAll('input, select').forEach(input => {
+        input.disabled = false;
+    });
+    
+    // Hide QR code container and clear its contents
+    qrCodeContainer.style.display = 'none';
+    qrCode.innerHTML = '';
+    document.getElementById('backupCode').textContent = '';
+    
+    // Reset buttons
+    generateQRBtn.style.display = 'block';
+    generateQRBtn.disabled = false;
+    saveUserBtn.style.display = 'none';
+
+    // Remove any hidden secret_key input if it exists
+    const secretKeyInput = form.querySelector('input[name="secret_key"]');
+    if (secretKeyInput) {
+        secretKeyInput.remove();
+    }
+}
+
+// Make sure modal is properly initialized
+document.addEventListener('DOMContentLoaded', function() {
+    const addUserModal = document.getElementById('addUserModal');
+    if (addUserModal) {
+        new bootstrap.Modal(addUserModal);
+    }
 });
 </script>

@@ -20,6 +20,10 @@ $action = (isset($_GET['action']) && $_GET['action'] != '') ? $_GET['action'] : 
 
 switch ($action) {
 
+	case 'generate_qr':
+		generateQR();
+		break;
+
 	case 'add' :
 
 	doInsert();
@@ -58,73 +62,89 @@ switch ($action) {
 
    
 
+	function generateQR() {
+		try {
+			// Validate required fields
+			if (empty($_POST['U_USERNAME'])) {
+				echo json_encode([
+					'success' => false,
+					'message' => 'Email is required for QR code generation'
+				]);
+				exit;
+			}
+	
+			// Initialize Google Authenticator
+			$gAuth = new GoogleAuthenticator();
+			$secretKey = $gAuth->generateSecret();
+			
+			// Generate QR Code URL
+			$qrCodeUrl = GoogleQrUrl::generate(
+				$_POST['U_USERNAME'],
+				$secretKey,
+				'Windale Hardware'
+			);
+			
+			// Return success response with QR code URL and secret key
+			echo json_encode([
+				'success' => true,
+				'qrCodeUrl' => $qrCodeUrl,
+				'secretKey' => $secretKey
+			]);
+			exit;
+		} catch (Exception $e) {
+			echo json_encode([
+				'success' => false,
+				'message' => 'Error generating QR code: ' . $e->getMessage()
+			]);
+			exit;
+		}
+	}
+	
+	
 	function doInsert() {
-		if(isset($_POST['save'])) {
-			if ($_POST['U_NAME'] == "" OR $_POST['U_USERNAME'] == "" OR $_POST['U_PASS'] == "") {
-				$messageStats = false;
-				message("All fields are required!", "error");
-				redirect('index.php?view=add');
-			} else {
-				// Initialize Google Authenticator
-				$gAuth = new GoogleAuthenticator();
-				$secretKey = $gAuth->generateSecret();
+		if (isset($_POST['save'])) {
+			// Validate all required fields
+			if (empty($_POST['U_NAME']) || 
+				empty($_POST['U_USERNAME']) || 
+				empty($_POST['U_PASS']) || 
+				empty($_POST['secret_key'])) {  
 				
-				// Generate QR Code URL
-				$qrCodeUrl = GoogleQrUrl::generate(
-					$_POST['U_USERNAME'],
-					$secretKey,
-					'Windale Hardware'
-				);
-				
+				echo json_encode([
+					'success' => false,
+					'message' => 'All fields are required!'
+				]);
+				exit;
+			}
+	
+			try {
 				$user = New User();
 				$user->U_NAME = $_POST['U_NAME'];
 				$user->U_USERNAME = $_POST['U_USERNAME'];
 				$user->U_CON = $_POST['U_CON'];
 				$user->U_PASS = password_hash($_POST['U_PASS'], PASSWORD_DEFAULT);
 				$user->U_ROLE = $_POST['U_ROLE'];
-				$user->SECRET_KEY = $secretKey; // Add this field to your database
-				
-				if($user->create()) {
-					$_SESSION['success'] = "New user added successfully! Please configure 2FA.";
-					// Return QR code URL and secret key as JSON
-					header('Content-Type: application/json');
+				$user->SECRET_KEY = $_POST['secret_key'];
+	
+				if ($user->create()) {
+					// Remove the session message since we're handling it with JSON
 					echo json_encode([
 						'success' => true,
-						'qrCodeUrl' => $qrCodeUrl,
-						'secretKey' => $secretKey
+						'message' => 'New user added successfully! Please configure 2FA.'
 					]);
 					exit;
 				} else {
-					message("Error creating user!", "error");
-					redirect('index.php?view=add');
+					echo json_encode([
+						'success' => false,
+						'message' => 'Error creating user'
+					]);
+					exit;
 				}
-			}
-		}
-	}
-
-
-	function doEdit() {
-		if (isset($_POST['save'])) {
-			$user = new User();
-			$user->U_NAME = $_POST['U_NAME'];
-			$user->U_USERNAME = $_POST['U_USERNAME'];
-			$user->U_ROLE = $_POST['U_ROLE'];
-	
-			// Only update the password if it's not empty
-			if (!empty($_POST['U_PASS'])) {
-				$user->U_PASS = sha1($_POST['U_PASS']);
-			}
-	
-	
-			$user->update($_POST['USERID']);
-	
-			$_SESSION['success'] = "User account updated successfully!";
-	
-			if ($_SESSION['USERID'] == $_POST['USERID'] && $_SESSION['U_ROLE'] == 'Staff') {
-				redirect(web_root . "admin/dashboard/index.php");
-			} else {
-				// For admin or when admin edits other accounts	
-				redirect(web_root . "admin/user/index.php");
+			} catch (Exception $e) {
+				echo json_encode([
+					'success' => false,
+					'message' => 'Error creating user: ' . $e->getMessage()
+				]);
+				exit;
 			}
 		}
 	}
