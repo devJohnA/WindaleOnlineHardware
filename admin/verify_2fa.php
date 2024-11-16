@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Database connection
-$conn = new mysqli("localhost", "root", "", "dried");
+$conn = new mysqli("localhost", "u510162695_dried", "1Dried_password", "u510162695_dried");
 
 if ($conn->connect_error) {
     die(json_encode(['success' => false, 'message' => 'Connection failed']));
