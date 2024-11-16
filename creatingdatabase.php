@@ -4,6 +4,7 @@ $servername = "localhost";
 $username = "u510162695_dried"; 
 $password = "1Dried_password"; 
 $dbname = "u510162695_dried"; 
+
 // Create a new MySQLi connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -12,7 +13,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+echo "Connected successfully!";  // Debugging line to ensure connection works
 
+// SQL query to add the OTP and OTP_TIMESTAMP columns to tbluseraccount
 $sql = "ALTER TABLE `tbluseraccount`
     ADD COLUMN `OTP` varchar(6) DEFAULT NULL, 
     ADD COLUMN `OTP_TIMESTAMP` timestamp NULL DEFAULT NULL;";
