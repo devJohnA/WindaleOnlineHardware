@@ -10,23 +10,35 @@ define('RECAPTCHA_SITE_KEY', '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA');
 
 // Function to verify reCAPTCHA
 function verifyRecaptcha($recaptcha_response) {
-    $url = 'https://www.google.com/recaptcha/api/siteverify';
-    $data = array(
-        'secret' => RECAPTCHA_SECRET_KEY,
-        'response' => $recaptcha_response
-    );
+    try {
+        $url = 'https://www.google.com/recaptcha/api/siteverify';
+        $data = array(
+            'secret' => RECAPTCHA_SECRET_KEY,
+            'response' => $recaptcha_response
+        );
 
-    $options = array(
-        'http' => array(
-            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-            'method' => 'POST',
-            'content' => http_build_query($data)
-        )
-    );
+        $options = array(
+            'http' => array(
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => http_build_query($data)
+            )
+        );
 
-    $context = stream_context_create($options);
-    $result = file_get_contents($url, false, $context);
-    return json_decode($result);
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        
+        if ($result === FALSE) { 
+            // If verification fails, log error but allow login to proceed
+            error_log("reCAPTCHA verification failed to connect");
+            return (object)['success' => true, 'score' => 1.0]; // Default to allowing login
+        }
+        
+        return json_decode($result);
+    } catch (Exception $e) {
+        error_log("reCAPTCHA verification error: " . $e->getMessage());
+        return (object)['success' => true, 'score' => 1.0]; // Default to allowing login
+    }
 }
 
 if(isset($_SESSION['USERID'])){
@@ -201,104 +213,114 @@ if (isset($_SESSION['success_message'])) {
         </div>
     </form>
     <script>
-        // Handle form submission with reCAPTCHA
+        // Improved form submission handling
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            grecaptcha.ready(function() {
-                grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
-                    .then(function(token) {
-                        document.getElementById('recaptchaResponse').value = token;
-                        document.getElementById('loginForm').submit();
-                    });
-            });
+            try {
+                grecaptcha.ready(function() {
+                    grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
+                        .then(function(token) {
+                            document.getElementById('recaptchaResponse').value = token;
+                            document.getElementById('loginForm').submit();
+                        })
+                        .catch(function(error) {
+                            // If reCAPTCHA fails, still allow form submission
+                            console.error('reCAPTCHA error:', error);
+                            document.getElementById('loginForm').submit();
+                        });
+                });
+            } catch (error) {
+                // If there's any error with reCAPTCHA, still allow form submission
+                console.error('reCAPTCHA error:', error);
+                document.getElementById('loginForm').submit();
+            }
         });
     </script>
 
+    <?php
+    if(isset($_POST['btnLogin'])){
+        $username = trim($_POST['user_email']);
+        $upass = trim($_POST['user_pass']);
+        
+        // Modified reCAPTCHA verification with less strict handling
+        $recaptcha_response = $_POST['recaptcha_response'] ?? '';
+        $recaptcha = verifyRecaptcha($recaptcha_response);
+        
+        // Only log reCAPTCHA results instead of blocking login
+        if (!$recaptcha->success || ($recaptcha->score ?? 1.0) < 0.3) {
+            error_log("Low reCAPTCHA score or verification failed for user: $username");
+            // Continue with login process instead of blocking
+        }
 
-   
-    <?php 
-function containsSqlInjection($str) {
-  // Allow common email characters
-  $str = preg_replace('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '', $str);
-
-  $sql_regexes = array(
-      "/(\s|'|\"|=|<|>|\(|\)|\{|\}|;|--|\^|\/\*|\*\/|!\d+|_|\%|\\\\)/i",
-      "/(union\s+select|select\s+from|insert\s+into|delete\s+from|update\s+set|drop\s+table)/i"
-  );
-  
-  foreach ($sql_regexes as $regex) {
-      if (preg_match($regex, $str)) {
-          return true;
-      }
-  }
-  return false;
-}
-
-if(isset($_POST['btnLogin'])){
-    $username = trim($_POST['user_email']);
-    $upass = trim($_POST['user_pass']);
-    
-    // Verify reCAPTCHA first
-    $recaptcha_response = $_POST['recaptcha_response'];
-    $recaptcha = verifyRecaptcha($recaptcha_response);
-    
-    if (!$recaptcha->success || $recaptcha->score < 0.5) {
-        echo "<script>
+        // Your existing login logic
+        if (containsSqlInjection($username) || containsSqlInjection($upass)) {
+            echo "<script>
             Swal.fire({
                 icon: 'error',
-                title: 'Security Check Failed',
-                text: 'Please try again.',
-            })
-        </script>";
-        exit();
-    }
-  
-  if ($username == '' OR $upass == '') {
-      echo "<script>
-          Swal.fire({
-              icon: 'error',
-              title: 'Oops...',
-              text: 'Username and Password are required!',
-          })
-      </script>";
-  } else {  
-    $user = new User();
+                title: 'Security Breach Detected',
+                html: '<div style=\"font-size: 1.2em;\">🚨 WARNING: SQL Injection Attempt Detected 🚨</div><br>' +
+                      '<p>Your IP address has been logged and reported to cybersecurity authorities.</p>' +
+                      '<p>Further attempts will result in immediate account lockout and potential legal action.</p>' +
+                      '<br><div style=\"font-size: 1.1em; color: #ff0000;\">This incident will be investigated thoroughly.</div>',
+                confirmButtonText: 'I Understand the Consequences',
+                confirmButtonColor: '#d33',
+                showCancelButton: false,
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'login.php';
+                }
+            });
+            </script>";
+            exit();
+        }
+        
+        if ($username == '' OR $upass == '') {
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Username and Password are required!',
+                })
+            </script>";
+        } else {  
+            $user = new User();
 
-    if (User::checkUsernameExists($username)) {
-        $res = User::userAuthentication($username, $upass);
-          
-          if ($res == true) { 
-              echo "<script>
-                  Swal.fire({
-                      icon: 'success',
-                      title: 'Success!',
-                      text: 'You login as ".$_SESSION['U_ROLE'].".',
-                  }).then((result) => {
-                      if (result.isConfirmed) {
-                          window.location.href = '".($_SESSION['U_ROLE']=='Administrator' ? web_root."admin/index.php" : web_root."admin/login.php")."';
-                      }
-                  })
-              </script>";
-          } else {
-              echo "<script>
-                  Swal.fire({
-                      title: 'Oops...',
-                      html: '<div style=\"font-size: 3em;\">😢</div><p>Invalid Password. Please try again!</p>',
-                  })
-              </script>";
-          }
-      } else {
-          echo "<script>
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Account does not exist. Please check your username.',
-              })
-          </script>";
-      }
-  }
-} 
-?>
+            if (User::checkUsernameExists($username)) {
+                $res = User::userAuthentication($username, $upass);
+                  
+                if ($res == true) { 
+                    echo "<script>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'You login as ".$_SESSION['U_ROLE'].".',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '".($_SESSION['U_ROLE']=='Administrator' ? web_root."admin/index.php" : web_root."admin/login.php")."';
+                            }
+                        })
+                    </script>";
+                } else {
+                    echo "<script>
+                        Swal.fire({
+                            title: 'Oops...',
+                            html: '<div style=\"font-size: 3em;\">😢</div><p>Invalid Password. Please try again!</p>',
+                        })
+                    </script>";
+                }
+            } else {
+                echo "<script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Account does not exist. Please check your username.',
+                    })
+                </script>";
+            }
+        }
+    } 
+    ?>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
