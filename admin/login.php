@@ -193,7 +193,7 @@ if (isset($_SESSION['success_message'])) {
     <div class="background">
         <div class="shape"></div>
     </div>
-    <form method="post" action="" role="login">
+    <form method="post" action="" role="login" onsubmit="return false;">
     <div class="logo-container">
             <img src="win.png" alt="Windale Hardware Store Logo">
         </div>
@@ -213,28 +213,22 @@ if (isset($_SESSION['success_message'])) {
         </div>
     </form>
     <script>
-        // Improved form submission handling
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            try {
-                grecaptcha.ready(function() {
-                    grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
-                        .then(function(token) {
-                            document.getElementById('recaptchaResponse').value = token;
-                            document.getElementById('loginForm').submit();
-                        })
-                        .catch(function(error) {
-                            // If reCAPTCHA fails, still allow form submission
-                            console.error('reCAPTCHA error:', error);
-                            document.getElementById('loginForm').submit();
-                        });
+    // Add event listener to the form
+    document.querySelector('form[role="login"]').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        grecaptcha.ready(function() {
+            grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: 'login'})
+                .then(function(token) {
+                    document.getElementById('recaptchaResponse').value = token;
+                    document.querySelector('form[role="login"]').submit();
+                })
+                .catch(function(error) {
+                    console.error('reCAPTCHA error:', error);
+                    document.querySelector('form[role="login"]').submit();
                 });
-            } catch (error) {
-                // If there's any error with reCAPTCHA, still allow form submission
-                console.error('reCAPTCHA error:', error);
-                document.getElementById('loginForm').submit();
-            }
         });
+    });
     </script>
 
     <?php
