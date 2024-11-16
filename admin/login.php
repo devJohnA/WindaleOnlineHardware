@@ -5,8 +5,8 @@ $msg = "";
 require_once("../include/initialize.php");
 
 // Add reCAPTCHA secret key
-define('RECAPTCHA_SECRET_KEY', 'YOUR_SECRET_KEY_HERE');
-define('RECAPTCHA_SITE_KEY', 'YOUR_SITE_KEY_HERE');
+define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
+define('RECAPTCHA_SITE_KEY', '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA');
 
 // Function to verify reCAPTCHA
 function verifyRecaptcha($recaptcha_response) {
