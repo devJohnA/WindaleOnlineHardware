@@ -71,13 +71,12 @@ switch ($action) {
 				$customer->GENDER = $_POST['GENDER'];
 				$customer->PHONE = $_POST['PHONE'];
 				$customer->CUSUNAME = $email;
-				$customer->CUSPASS = sha1($_POST['CUSPASS']);
+				$customer->CUSPASS = password_hash($_POST['CUSPASS'], PASSWORD_DEFAULT);
 				$customer->DATEJOIN = date('Y-m-d H:i:s');
 				$customer->TERMS = 1;
 				$customer->create();
 	
-				$h_upass = sha1(trim($_POST['CUSPASS']));
-	
+				$h_upass = trim($_POST['CUSPASS']); // Plain password for authentication
 				$user = new Customer();
 				$res = $user->cusAuthentication($email, $h_upass);
 	

@@ -44,44 +44,31 @@ class User {
 
 	}
 
-	static function userAuthentication($U_USERNAME,$h_pass){
-
+	public static function userAuthentication($U_USERNAME, $password) {
 		global $mydb;
-
-		$mydb->setQuery("SELECT * FROM `tbluseraccount` WHERE `U_USERNAME` = '". $U_USERNAME ."' and `U_PASS` = '". $h_pass ."'");
-
+		$mydb->setQuery("SELECT * FROM `tbluseraccount` WHERE `U_USERNAME` = '" . $U_USERNAME . "'");
 		$cur = $mydb->executeQuery();
-
-		if($cur==false){
-
+	
+		if ($cur == false) {
 			die(mysql_error());
-
 		}
-
-		$row_count = $mydb->num_rows($cur);//get the number of count
-
-		 if ($row_count == 1){
-
-		 $user_found = $mydb->loadSingleResult();
-
-		 	$_SESSION['USERID']   		= $user_found->USERID;
-
-		 	$_SESSION['U_NAME']      	= $user_found->U_NAME;
-
-		 	$_SESSION['U_USERNAME'] 	= $user_found->U_USERNAME;
-
-		 	$_SESSION['U_PASS'] 		= $user_found->U_PASS;
-
-		 	$_SESSION['U_ROLE'] 		= $user_found->U_ROLE;
-
-		   return true;
-
-		 }else{
-
-		 	return false;
-
-		 }
-
+	
+		$row_count = $mydb->num_rows($cur);
+		if ($row_count == 1) {
+			$user_found = $mydb->loadSingleResult();
+	
+			if (password_verify($password, $user_found->U_PASS)) {
+				$_SESSION['USERID'] = $user_found->USERID;
+				$_SESSION['U_NAME'] = $user_found->U_NAME;
+				$_SESSION['U_USERNAME'] = $user_found->U_USERNAME;
+				$_SESSION['U_ROLE'] = $user_found->U_ROLE;
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
 	}
 	
 	static function checkUsernameExists($username) {
