@@ -13,7 +13,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// SQL query to add the OTP and OTP_TIMESTAMP columns to tbluseraccount
+
 $sql = "ALTER TABLE `tbluseraccount`
     ADD COLUMN `OTP` varchar(6) DEFAULT NULL, 
     ADD COLUMN `OTP_TIMESTAMP` timestamp NULL DEFAULT NULL;";
