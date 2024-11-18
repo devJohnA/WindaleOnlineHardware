@@ -82,6 +82,7 @@ if (!isset($_SESSION['verified_email'])) {
                                    id="code" 
                                    name="code" 
                                    maxlength="6" 
+                                   placeholder ="Input Google Authenticator"
                                    pattern="[0-9]{6}" 
                                    required 
                                    autocomplete="off">
