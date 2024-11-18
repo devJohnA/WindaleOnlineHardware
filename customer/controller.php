@@ -124,7 +124,7 @@ switch ($action) {
 				$customer->LNAME = $_POST['LNAME'];
 				$customer->CITYADD = $_POST['CITYADD'];
 				$customer->LMARK = $_POST['LMARK'];
-				// $customer->GENDER = $_POST['GENDER'];
+				$customer->GENDER = $_POST['GENDER'];
 				$customer->PHONE = $_POST['PHONE'];
 				$customer->CUSUNAME = $_POST['CUSUNAME'];
 				
