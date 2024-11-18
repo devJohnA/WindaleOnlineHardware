@@ -13,7 +13,7 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 
 // Database connection
 try {
-    $conn = new mysqli("localhost", "root", "", "dried");
+    $conn = new mysqli("localhost", "u510162695_dried", "1Dried_password", "u510162695_dried");
     
     if ($conn->connect_error) {
         throw new Exception('Database connection failed: ' . $conn->connect_error);
