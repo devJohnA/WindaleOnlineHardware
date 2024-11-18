@@ -359,7 +359,7 @@ $notificationCount = $result->num_rows;
     }).then((result) => {
         if (result.isConfirmed) {
             // If user confirms, send AJAX request to logout.php
-            fetch('<?php echo web_root?>logout.php', {
+            fetch('<?php echo web_root?>logout', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -374,7 +374,7 @@ $notificationCount = $result->num_rows;
                         'success'
                     ).then(() => {
                         // Redirect to home page or login page
-                        window.location.href = '<?php echo web_root?>admin/logout.php';
+                        window.location.href = '<?php echo web_root?>admin/logout';
                     });
                 } else {
                     Swal.fire(
