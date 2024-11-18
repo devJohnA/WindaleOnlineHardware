@@ -87,7 +87,7 @@ $con = mysqli_connect('localhost', 'u510162695_dried', '1Dried_password', 'u5101
                     $_SESSION['info'] = $info;
                     $_SESSION['email'] = $email;
 
-                    header('location: reset-code.php');
+                    header('location: reset-code');
                     exit();
                 }else{
                     $errors['otp-error'] = "Failed while sending code!";
@@ -114,7 +114,7 @@ $con = mysqli_connect('localhost', 'u510162695_dried', '1Dried_password', 'u5101
             $_SESSION['U_USERNAME'] = $email;
             $info = "Please create a new password.";
             $_SESSION['info'] = $info;
-            header('location: createnewpassword.php');
+            header('location: createnewpassword');
             exit();
         }else{
             $errors['otp-error'] = "You've entered an incorrect code!";
@@ -137,7 +137,7 @@ $con = mysqli_connect('localhost', 'u510162695_dried', '1Dried_password', 'u5101
             if($run_query){
                 $info = "Your password has been reset. You can now login with your new password.";
                 $_SESSION['info'] = $info;
-                header('Location: backtologin.php');
+                header('Location: backtologin');
             }else{
                 $errors['db-error'] = "Failed to change your password!";
             }
