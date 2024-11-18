@@ -277,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="password">Password</label>
         <input type="password" name="user_pass" id="password" placeholder="Password">
       </div>
-        <p class="text-end" style="float:right; margin-top:10px;"><a href="choose-forgotpass.php" class="p">Forgot Password?</p>
+        <p class="text-end" style="float:right; margin-top:10px;"><a href="choose-forgotpass" class="p">Forgot Password?</p>
         <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
         <button type="submit" name="btnLogin">Log In</button>
         <!-- <div class="social">
