@@ -325,6 +325,17 @@ label[for="click"] i.fas {
   padding: 20px;
   width: 100%;
 }
+
+.chat-box{
+    position: relative;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      border-top: 4px solid red; /* Adds a red line at the top */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+}
+
 .chat-box .desc-text{
   color: #515365;
   text-align: center;
