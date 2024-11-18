@@ -50,11 +50,11 @@
     </style>
 </head>
 <body style="background-color:hsl(49 26.8% 92% /1);" class="d-flex align-items-center justify-content-center">
-<div class="custom-shape-divider-bottom-1728231997">
+<!-- <div class="custom-shape-divider-bottom-1728231997">
     <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
         <path d="M1200,0H0V120H281.94C572.9,116.24,602.45,3.86,602.45,3.86h0S632,116.24,923,120h277Z" class="shape-fill"></path>
     </svg>
-</div>
+</div> -->
     <div class="forgot-password-container bg-white p-4 rounded shadow">
         <div class="start-end"> <img src="../onlinecustomer/win.png" width="80" height="80"></div>
         <h2 class="text-center mb-3">Forgot Password?</h2>
