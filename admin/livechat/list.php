@@ -841,47 +841,43 @@ function updateChat() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
     const confirmationDialog = document.getElementById('confirmationDialog');
     const confirmDeleteBtn = document.getElementById('confirmDelete');
     const cancelDeleteBtn = document.getElementById('cancelDelete');
+
     loadChatList();
 
-   // Modify the click event listener for chat items
-   document.getElementById('chat-list').addEventListener('click', (event) => {
-    const chatItem = event.target.closest('.chat-list-item');
-    if (chatItem) {
-        const userId = chatItem.dataset.userId;
-        document.querySelectorAll('.chat-list-item').forEach(item => {
-            item.classList.remove('active');
-            updateChatItemStyle(item, item.dataset.hasNewMessage === 'true');
-        });
-        chatItem.classList.add('active');
-        updateChatItemStyle(chatItem, false); // Set to muted when active
-        loadConversation(userId);
-        markAsRead(userId);
-        
-        // Update read status in the database
-        fetch('updateReadStatus.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `id=${userId}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Read status updated in database');
-            } else {
-                console.error('Failed to update read status:', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error updating read status:', error);
-        });
-    }
-});
+    document.getElementById('chat-list').addEventListener('click', (event) => {
+        const chatItem = event.target.closest('.chat-list-item');
+        if (chatItem) {
+            const userId = chatItem.dataset.userId;
+            document.querySelectorAll('.chat-list-item').forEach(item => item.classList.remove('active'));
+            chatItem.classList.add('active');
+            loadConversation(userId);
+            markAsRead(userId);
+            updateChatItemStyle(chatItem, false);
+            
+            // Update read status in the database
+            fetch('updateReadStatus.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id=${userId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Read status updated in database');
+                } else {
+                    console.error('Failed to update read status:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating read status:', error);
+            });
+        }
+    });
 
 
     document.getElementById('send-message-btn').addEventListener('click', debouncedSendMessage);
