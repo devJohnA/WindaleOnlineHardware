@@ -399,43 +399,102 @@ switch ($action) {
 	 
 
 		}
-		function doupdateimage(){
+		function doupdateimage() {
 			$allowed_types = ['image/png', 'image/jpg', 'image/jpeg'];
+			$allowed_extensions = ['jpg', 'jpeg', 'png'];
 			$max_file_size = 8000000; // 8MB in bytes
 		
 			$errorfile = $_FILES['photo']['error'];
 			$type = $_FILES['photo']['type'];
 			$temp = $_FILES['photo']['tmp_name'];
-			$myfile = $_FILES['photo']['name'];
-			$location = "customer_image/" . $myfile;
+			$original_filename = $_FILES['photo']['name'];
 		
+			// Basic error checking
 			if ($errorfile > 0) {
 				message("No Image Selected!", "error");
-				redirect(web_root . "index.php?q=profile");
-			} elseif (!in_array($type, $allowed_types)) {
-				message("Uploaded file is not a valid image format (PNG, JPG, JPEG)!", "error");
-				redirect(web_root . "index.php?q=profile");
-			} elseif ($_FILES['photo']['size'] > $max_file_size) {
+				redirect(web_root . "index?q=profile");
+				return;
+			}
+		
+			// Check file size
+			if ($_FILES['photo']['size'] > $max_file_size) {
 				message("Uploaded file exceeds the maximum size of 8 MB!", "error");
-				redirect(web_root . "index.php?q=profile");
-			} else {
-				$image_size = getimagesize($temp);
-				if ($image_size === FALSE) {
-					message("Uploaded file is not an image!", "error");
-					redirect(web_root . "index.php?q=profile");
-				} else {
-					// Upload the file
-					move_uploaded_file($temp, $location);
+				redirect(web_root . "index?q=profile");
+				return;
+			}
 		
-					$customer = New Customer();
-					$customer->CUSPHOTO = $location;
-					$customer->update($_SESSION['CUSID']);
+			// Secure filename checking
+			$file_parts = explode('.', strtolower($original_filename));
+			
+			// Check for multiple extensions
+			if (count($file_parts) > 2) {
+				message("Multiple file extensions are not allowed!", "error");
+				redirect(web_root . "index?q=profile");
+				return;
+			}
 		
-					// Set a session variable for the success message
-					$_SESSION['upload_success'] = true;
+			// Get the actual extension
+			$extension = end($file_parts);
+			
+			// Validate extension
+			if (!in_array($extension, $allowed_extensions)) {
+				message("Invalid file extension! Only .jpg, .jpeg, and .png are allowed.", "error");
+				redirect(web_root . "index?q=profile");
+				return;
+			}
 		
-					redirect(web_root . "index.php?q=profile");
+			// Validate MIME type
+			if (!in_array($type, $allowed_types)) {
+				message("Uploaded file is not a valid image format (PNG, JPG, JPEG)!", "error");
+				redirect(web_root . "index?q=profile");
+				return;
+			}
+		
+			// Additional image validation
+			$image_size = getimagesize($temp);
+			if ($image_size === FALSE) {
+				message("Uploaded file is not a valid image!", "error");
+				redirect(web_root . "index?q=profile");
+				return;
+			}
+		
+			// Generate a secure filename
+			$new_filename = uniqid() . '.' . $extension;
+			$location = "customer_image/" . $new_filename;
+		
+			// Verify the image mime type matches the extension
+			$finfo = finfo_open(FILEINFO_MIME_TYPE);
+			$detected_type = finfo_file($finfo, $temp);
+			finfo_close($finfo);
+		
+			if (!in_array($detected_type, $allowed_types)) {
+				message("File type mismatch detected!", "error");
+				redirect(web_root . "index?q=profile");
+				return;
+			}
+		
+			// Try to upload the file
+			if (!move_uploaded_file($temp, $location)) {
+				message("Failed to upload file!", "error");
+				redirect(web_root . "index?q=profile");
+				return;
+			}
+		
+			// Update database
+			try {
+				$customer = New Customer();
+				$customer->CUSPHOTO = $location;
+				$customer->update($_SESSION['CUSID']);
+				
+				$_SESSION['upload_success'] = true;
+				redirect(web_root . "index?q=profile");
+			} catch (Exception $e) {
+				// If database update fails, remove the uploaded file
+				if (file_exists($location)) {
+					unlink($location);
 				}
+				message("Database update failed!", "error");
+				redirect(web_root . "index?q=profile");
 			}
 		}
 

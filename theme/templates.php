@@ -73,17 +73,17 @@ if (isset($_SESSION['gcCart'])){
                     </div>
                     <div class="col-md-8 clearfix">
                         <div class="shop-menu clearfix pull-right">
-                            <ul class="nav navbar-nav">
-                                <li><a href="<?php echo web_root;?>index.php?q=cart" class="<?php echo isActive('cart', $view); ?>"><i class="fa fa-shopping-cart"></i>
+                        <ul class="nav navbar-nav">
+                                <li><a href="<?php echo web_root;?>index?q=cart" class="<?php echo isActive('cart', $view); ?>"><i class="fa fa-shopping-cart"></i>
                                         Cart</a></li>
                                 <?php if (isset($_SESSION['CUSID'] )) { ?>
-                                <li><a href="<?php echo web_root?>index.php?q=profile" class="<?php echo isActive('profile', $view); ?>"><i class="fa fa-user"></i>
+                                <li><a href="<?php echo web_root?>index?q=profile" class="<?php echo isActive('profile', $view); ?>"><i class="fa fa-user"></i>
                                         Account</a></li>
                                 <li><a href="<?php echo web_root?>logout.php" id="logoutLink"><i class="fa fa-lock"></i> Logout</a></li>
                                 <?php }else{ ?>
-                                    <li><a href="onlinecustomer/index.php"><i class="fa fa-users"></i>
+                                <li><a href="onlinecustomer/index"><i class="fa fa-users"></i>
                                         Customer </a></li>
-                                        <li><a href="./admin/index.php"><i class="fa fa-user-shield"></i>
+                                        <li><a href="./admin/index"><i class="fa fa-user-shield"></i>
                                         Admin</a></li>
                                 <?php } ?>
                             </ul>
@@ -109,7 +109,7 @@ if (isset($_SESSION['gcCart'])){
                             </button>
                         </div>
                         <div class="mainmenu pull-left">
-                            <ul class="nav navbar-nav collapse navbar-collapse">
+                        <ul class="nav navbar-nav collapse navbar-collapse">
                                 <li><a href="<?php echo web_root;?>" class="<?php echo isActive('', $view); ?>">Home</a></li>
                                 <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
                                     <ul role="menu" class="sub-menu">
@@ -123,8 +123,8 @@ if (isset($_SESSION['gcCart'])){
                                 </li>
 
 
-                                <li><a href="<?php web_root?>index.php?q=product" class="<?php echo isActive('product', $view); ?>">Products</a></li>
-                                <li><a href="<?php web_root?>index.php?q=contact" class="<?php echo isActive('contact', $view); ?>">Contact</a></li>
+                                <li><a href="<?php web_root?>index?q=product" class="<?php echo isActive('product', $view); ?>">Products</a></li>
+                                <li><a href="<?php web_root?>index?q=contact" class="<?php echo isActive('contact', $view); ?>">Contact</a></li>
                             </ul>
                         </div>
                     </div>
