@@ -197,7 +197,7 @@ function logSqlInjectionAttempt($ip_address) {
     $mydb->executeQuery();
 }
 
-// Function to check the login attempts for the email
+// Function to check the login attempts for the email (from session)
 function checkLoginAttempts($email) {
     // Check if there are attempts stored in the session
     if (isset($_SESSION['login_attempts'][$email])) {
@@ -332,6 +332,9 @@ if(isset($_POST['modalLogin'])) {
             ]);
         }
     } else {
+        // Email doesn't exist in the database, so just increment attempts
+        incrementLoginAttempts($email);
+        
         echo json_encode([
             'status' => 'error',
             'message' => 'Invalid Username and Password!'
