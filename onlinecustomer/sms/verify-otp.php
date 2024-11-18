@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $clear_stmt->close();
         
         $_SESSION['verification_success'] = "OTP Verified Successfully! You can now change your password.";
-    header("Location: newpassword.php");
+    header("Location: newpassword");
     exit();
     } else {
         $error = "Invalid OTP or OTP has expired.";

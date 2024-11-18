@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             // If we got here, everything worked
             $_SESSION['success_message'] = "OTP sent successfully! Please check your phone.";
-            header("Location: verify-otp.php");
+            header("Location: verify-otp");
             exit();
             
         } else {
