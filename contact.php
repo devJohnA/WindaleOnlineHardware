@@ -31,7 +31,7 @@ foreach ($cur as $result) { ?>
                     <p>Burgos Street, Mancilang, Madridejos, Cebu</p>
                     <p>Opening and Closing Time: Monday - Saturday: 8:00 AM to 5:00 PM</p>
                     <p>Contact Number : <?php echo $result->U_CON; ?></p>
-                    <p>Email: <?php echo $result->U_EMAIL; ?></p>
+                    <!-- <p>Email: <?php echo $result->U_EMAIL; ?></p> -->
                 </address>
 
             </div>
