@@ -136,7 +136,7 @@ $notificationCount = $result->num_rows;
                 $imagePath = '../stock/upload/' . $row['images']; 
         
                 echo '<div class="item p-3">';
-                echo '<a href="' . web_root . 'admin/stock/index.php?productId=' . $productId . '" class="notification-item" data-product-id="' . $productId . '">';
+                echo '<a href="' . web_root . 'admin/stock/index?productId=' . $productId . '" class="notification-item" data-product-id="' . $productId . '">';
                 echo '<div class="row gx-2 justify-content-between align-items-center">';
                 echo '<div class="col-auto">';
                 echo '<img class="profile-image" src="' . $imagePath . '" alt="Product Image">';
@@ -174,7 +174,7 @@ $notificationCount = $result->num_rows;
                                                 alt="<?php echo $_SESSION['U_NAME']; ?>"></a>
                                         <ul class="dropdown-menu" aria-labelledby="user-dropdown-toggle">
                                             <li><a class="dropdown-item"
-                                                    href="<?php echo web_root; ?>admin/user/index.php?view=account&id=<?php echo $_SESSION['USERID']; ?>">Account</a>
+                                                    href="<?php echo web_root; ?>admin/user/index?view=account&id=<?php echo $_SESSION['USERID']; ?>">Account</a>
                                             </li>
                                             <li>
                                                 <hr class="dropdown-divider">
@@ -204,42 +204,42 @@ $notificationCount = $result->num_rows;
                     <ul class="app-menu list-unstyled accordion" id="menu-accordion">
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/dashboard/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/dashboard/index.php">
+                                href="<?php echo web_root; ?>admin/dashboard/index">
                                 <i class="fas fa-home me-2"></i>
                                 <span class="nav-link-text">Dashboard</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/pos/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/pos/index.php">
+                                href="<?php echo web_root; ?>admin/pos/index">
                                 <i class="fas fa-cash-register me-2"></i>
                                 <span class="nav-link-text">Point of Sale</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/sales/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/sales/index.php">
+                                href="<?php echo web_root; ?>admin/sales/index">
                                 <i class="fas fa-chart-line me-2"></i>
                                 <span class="nav-link-text">Sales</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/products/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/products/index.php">
+                                href="<?php echo web_root; ?>admin/products/index">
                                 <i class="fas fa-box me-2"></i>
                                 <span class="nav-link-text">Product Detail Management</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/stock/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/stock/index.php">
+                                href="<?php echo web_root; ?>admin/stock/index">
                                 <i class="fas fa-warehouse me-2"></i>
                                 <span class="nav-link-text">Inventory Details</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/orders/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/orders/index.php"> 
+                                href="<?php echo web_root; ?>admin/orders/index"> 
                                 <i class="fas fa-shopping-cart me-2"></i>
                                 <?php echo $order; ?>
                                 <span class="nav-link-text">Orders</span>
@@ -247,7 +247,7 @@ $notificationCount = $result->num_rows;
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/category/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/category/index.php">
+                                href="<?php echo web_root; ?>admin/category/index">
                                 <i class="fas fa-tags me-2"></i>
                                 <span class="nav-link-text">Categories</span>
                             </a>
@@ -255,14 +255,14 @@ $notificationCount = $result->num_rows;
                         <?php if ($_SESSION['U_ROLE'] == 'Administrator') { ?>
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/user/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/user/index.php">
+                                href="<?php echo web_root; ?>admin/user/index">
                                 <i class="fas fa-users me-2"></i>
                                 <span class="nav-link-text">User</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/settings/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/settings/index.php">
+                                href="<?php echo web_root; ?>admin/settings/index">
                                 <i class="fas fa-cog me-2"></i>
                                 <span class="nav-link-text">Settings</span>
                             </a>
@@ -277,7 +277,7 @@ $notificationCount = $result->num_rows;
                         </li> -->
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/salesreport/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/salesreport/index.php">
+                                href="<?php echo web_root; ?>admin/salesreport/index">
                                 <i class="fas fa-file-alt me-2"></i>
                                 <span class="nav-link-text">In-Store Sales Report</span>
                             </a>
@@ -285,7 +285,7 @@ $notificationCount = $result->num_rows;
 
                         <li class="nav-item">
                             <a class="nav-link <?php echo isCurrentPage('/admin/onlinesales/') ? 'active' : ''; ?>"
-                                href="<?php echo web_root; ?>admin/onlinesales/index.php">
+                                href="<?php echo web_root; ?>admin/onlinesales/index">
                                 <i class="fas fa-file-alt me-2"></i>
                                 <span class="nav-link-text">Digital Sales Report</span>
                             </a>
@@ -293,7 +293,7 @@ $notificationCount = $result->num_rows;
 
                         <li class="nav-item">
     <a class="nav-link <?php echo isCurrentPage('/admin/livechat/') ? 'active' : ''; ?>"
-        href="<?php echo web_root; ?>admin/livechat/index.php">
+        href="<?php echo web_root; ?>admin/livechat/index">
         <i class="fas fa-envelope me-2" title="Chat with Support"></i>
         <span id="unread-message-count" class="badge bg-danger"></span>
         <span class="nav-link-text">Chat</span>   
