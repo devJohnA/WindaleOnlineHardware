@@ -119,6 +119,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit;
 }
+
+if (isset($_SESSION['2fa_verified']) && $_SESSION['2fa_verified'] === true) {
+    $msg = 'You have successfully authenticated! You can now proceed to login.';
+    // Reset 2FA verification after showing the message
+    unset($_SESSION['2fa_verified']);
+}
 ?>
 
 
@@ -269,7 +275,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="logo-container">
             <img src="win.png" alt="Windale Hardware Store Logo">
         </div>
-        <?php echo $msg; ?>
+        <?php if ($msg): ?>
+            <div class="alert alert-info"><?php echo $msg; ?></div>
+        <?php endif; ?>
 <div class="inputgroup">
         <label for="email" >Email</label>
         <input type="email" name="user_email" placeholder="Email">
