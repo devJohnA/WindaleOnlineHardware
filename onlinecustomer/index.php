@@ -15,6 +15,11 @@ if (isset($_GET['verification'])) {
     }
 }
 
+if (isset($_SESSION['success_message'])) {
+    $msg = "<div class='alert alert-success'>" . htmlspecialchars($_SESSION['success_message']) . "</div>";
+    unset($_SESSION['success_message']); // Clear the message after displaying
+}
+
 $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
 ?>
 <!DOCTYPE html>
@@ -112,7 +117,9 @@ $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
         <div class="start-end"> <img src="win.png" width="80" height="80"></div>
         <h2 class="text-center mb-3">Hello Again!</h2>
         <p class="text-center mb-4">Welcome back you've been missed!</p>
-        <?php echo $msg; ?>
+        <?php if (!empty($msg)): ?>
+            <?php echo $msg; ?>
+        <?php endif; ?>
         <form action="../login.php"  method="POST" id="loginForm">
         <input class="proid" type="hidden" name="proid" id="proid" value="">
         <input type="hidden" name="recaptcha_response" id="recaptchaResponse">

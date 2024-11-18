@@ -16,10 +16,10 @@ ini_set('display_errors', 1);
         $lname = $conn->real_escape_string($_POST['LNAME']);
         $cityadd = $conn->real_escape_string($_POST['CITYADD']);
         $lmark = $conn->real_escape_string($_POST['LMARK']);
-        $gender = $conn->real_escape_string($_POST['GENDER']);
+        // $gender = $conn->real_escape_string($_POST['GENDER']);
         $phone = $conn->real_escape_string($_POST['PHONE']);
         $cusuname = $conn->real_escape_string($_POST['CUSUNAME']);
-        $password = sha1($_POST['CUSPASS']);
+        $password = password_hash($_POST['CUSPASS'], PASSWORD_DEFAULT);
         $term = 1;
         $datejoin = date('Y-m-d H:i:s');
         $code = $conn->real_escape_string(md5(rand()));
@@ -39,8 +39,8 @@ ini_set('display_errors', 1);
         if (mysqli_num_rows(mysqli_query($conn, "SELECT * FROM tblcustomer WHERE CUSUNAME='{$cusuname}'")) > 0) {
             $msg = "<div class='alert alert-danger'>{$cusuname} - This username already exists.</div>";
         } else {    
-                $sql = "INSERT INTO tblcustomer (FNAME, LNAME, CITYADD, LMARK, GENDER, PHONE, CUSUNAME, CUSPASS, TERMS, DATEJOIN, code) 
-                        VALUES ('$fname', '$lname', '$cityadd', '$lmark', '$gender', '$phone', '$cusuname', '$password', '$term', '$datejoin', '$code')";
+                $sql = "INSERT INTO tblcustomer (FNAME, LNAME, CITYADD, LMARK, PHONE, CUSUNAME, CUSPASS, TERMS, DATEJOIN, code) 
+                        VALUES ('$fname', '$lname', '$cityadd', '$lmark', '$phone', '$cusuname', '$password', '$term', '$datejoin', '$code')";
                 $result = mysqli_query($conn, $sql);
 
                 if ($result) {
@@ -174,13 +174,13 @@ ini_set('display_errors', 1);
                     <input type="text" id="LNAME" name="LNAME" class="form-control" placeholder="Last name" required>
                 </div>
             </div>
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <select  id="GENDER" name="GENDER" class="form-select" required>
                     <option value="" selected disabled>Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                 </select>
-            </div>
+            </div> -->
             <p class="text-left">Ex: Burgos St. Mancilang, Madridejos Cebu.</p>
             <div class="mb-3">
                 <textarea class="form-control" id="CITYADD" name="CITYADD" rows="3" placeholder="Street/Brgy./Municipality/Province" value=""  required></textarea>

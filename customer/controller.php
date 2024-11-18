@@ -68,7 +68,7 @@ switch ($action) {
 				$customer->LNAME = $_POST['LNAME'];
 				$customer->CITYADD = $_POST['CITYADD'];
 				$customer->LMARK = $_POST['LMARK'];
-				$customer->GENDER = $_POST['GENDER'];
+				// $customer->GENDER = $_POST['GENDER'];
 				$customer->PHONE = $_POST['PHONE'];
 				$customer->CUSUNAME = $email;
 				$customer->CUSPASS = password_hash($_POST['CUSPASS'], PASSWORD_DEFAULT);
@@ -124,7 +124,7 @@ switch ($action) {
 				$customer->LNAME = $_POST['LNAME'];
 				$customer->CITYADD = $_POST['CITYADD'];
 				$customer->LMARK = $_POST['LMARK'];
-				$customer->GENDER = $_POST['GENDER'];
+				// $customer->GENDER = $_POST['GENDER'];
 				$customer->PHONE = $_POST['PHONE'];
 				$customer->CUSUNAME = $_POST['CUSUNAME'];
 				
@@ -505,7 +505,7 @@ switch ($action) {
 				$customer->CUSPASS = password_hash($_POST['CUSPASS'], PASSWORD_DEFAULT);
 				$customer->update($_SESSION['CUSID']);
 				$_SESSION['success_message'] = "Password has been updated successfully!";
-				redirect(web_root . 'index.php?q=profile');
+				redirect(web_root . 'index?q=profile');
 			}
 		}
  
