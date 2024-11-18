@@ -838,7 +838,7 @@ foreach ($cur as $result) {
         <input type="file" id="file-upload" name="image" accept="image/jpeg,image/png,image/jpg" style="display: none;">
         <label for="file-upload" class="file-label">
             <i class="fas fa-paperclip"></i>
-            <span>Choose a file</span>
+            <span>Choose a file (Optional)</span>
         </label>
     </div>
                <div class="field">
