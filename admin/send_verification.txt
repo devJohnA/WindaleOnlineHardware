@@ -28,40 +28,34 @@ try {
         throw new Exception('Database connection failed: ' . $conn->connect_error);
     }
 
-      // Check if email exists in tbluseraccount
-      $stmt = $conn->prepare("SELECT USERID FROM tbluseraccount WHERE U_USERNAME = ?");
-      $stmt->bind_param("s", $email);
-      $stmt->execute();
-      $result = $stmt->get_result();
-  
-      if ($result->num_rows === 0) {
-          // Email does not exist in the database
-          $stmt->close();
-          $conn->close();
-          echo json_encode([
-              'success' => false,
-              'message' => 'This email is not registered in our system.'
-          ]);
-          exit;
-      }
-  
-      // Generate verification token
-      $token = bin2hex(random_bytes(32));
-      $token_expiry = time() + 3600; // Token expires in 1 hour
-  
-      // Store the token in the database (if you have a table for this purpose)
-      // If the user already has a pending token, update the existing one
-  
-      // Assuming a table 'email_verifications' with columns 'email', 'token', 'expiry'
-      $stmt = $conn->prepare("REPLACE INTO email_verifications (email, token, expiry) VALUES (?, ?, ?)");
-      $stmt->bind_param("ssi", $email, $token, $token_expiry);
-      $stmt->execute();
-      $stmt->close();
-  
-      // Create verification link
-      $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
-      $verification_link = $actual_link . "/admin/verify?token=" . $token;
+    // Check if email exists in tbluseraccount
+    $stmt = $conn->prepare("SELECT USERID FROM tbluseraccount WHERE U_EMAIL = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
+    if ($result->num_rows > 0) {
+        $stmt->close();
+        $conn->close();
+        echo json_encode([
+            'success' => false,
+            'message' => 'This email is already registered in our system.'
+        ]);
+        exit;
+    }
+
+    $stmt->close();
+    $conn->close();
+
+    // Generate verification token
+    $token = bin2hex(random_bytes(32));
+    $_SESSION['verification_token'] = $token;
+    $_SESSION['verification_email'] = $email;
+    $_SESSION['token_expiry'] = time() + 3600; // Token expires in 1 hour
+
+    // Create verification link
+    $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+    $verification_link = $actual_link . "/admin/verify.php?token=" . $token;
 
     // Create email HTML content
     $emailBody = "

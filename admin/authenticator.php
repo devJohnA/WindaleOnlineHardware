@@ -1,4 +1,12 @@
+<?php
+session_start();
 
+if (!isset($_SESSION['verified_email'])) {
+    // If the email is not verified, redirect to the verification page
+    header('Location: verification.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
