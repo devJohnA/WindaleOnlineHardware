@@ -13,7 +13,7 @@
         <div class="app-card-body" style="margin: 0 15px;">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h3> <a href="index.php?view=add" class="btn btn-primary btn-sm "> <i
+                        <h3> <a href="index?view=add" class="btn btn-primary btn-sm "> <i
                                     class="fa fa-plus-circle fw-fa"></i> New</a> </h3>
                     </div>
                 </div>
