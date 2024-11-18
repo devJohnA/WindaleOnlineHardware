@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['success_message'] = "Your password has been updated successfully!";
     
             // Redirect to login page
-            header("Location: ../login.php");
+            header("Location: ../login");
             exit();
         } else {
             // Error occurred during the password update
