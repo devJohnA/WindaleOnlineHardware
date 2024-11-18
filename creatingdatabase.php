@@ -13,43 +13,32 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Query to fetch all records from tblcustomer
-$sql = "SELECT * FROM tblcustomer";
+// Query to describe the tblcustomer table
+$sql = "DESCRIBE tblcustomer";
+
+// Execute the query
 $result = $conn->query($sql);
 
-// Check if any records are returned
-if ($result->num_rows > 0) {
-    // Loop through the records and output data
+// Check if the query was successful
+if ($result) {
+    // Loop through the result and display each column's structure
+    echo "<h2>Table Structure for tblcustomer</h2>";
+    echo "<table border='1' cellpadding='10'>";
+    echo "<tr><th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th></tr>";
+    
     while ($row = $result->fetch_assoc()) {
-        // Displaying each record (example: echoing each column)
-        echo "Customer ID: " . $row["CUSTOMERID"] . "<br>";
-        echo "First Name: " . $row["FNAME"] . "<br>";
-        echo "Middle Name: " . $row["MNAME"] . "<br>";
-        echo "Last Name: " . $row["LNAME"] . "<br>";
-        echo "Home Number: " . $row["CUSHOMENUM"] . "<br>";
-        echo "Street Address: " . $row["STREETADD"] . "<br>";
-        echo "Barangay Address: " . $row["BRGYADD"] . "<br>";
-        echo "City Address: " . $row["CITYADD"] . "<br>";
-        echo "Landmark: " . $row["LMARK"] . "<br>";
-        echo "Province: " . $row["PROVINCE"] . "<br>";
-        echo "Country: " . $row["COUNTRY"] . "<br>";
-        echo "Date of Birth: " . $row["DBIRTH"] . "<br>";
-        echo "Gender: " . $row["GENDER"] . "<br>";
-        echo "Phone: " . $row["PHONE"] . "<br>";
-        echo "Email Address: " . $row["EMAILADD"] . "<br>";
-        echo "Zip Code: " . $row["ZIPCODE"] . "<br>";
-        echo "Username: " . $row["CUSUNAME"] . "<br>";
-        echo "Password: " . $row["CUSPASS"] . "<br>";
-        echo "Photo: " . $row["CUSPHOTO"] . "<br>";
-        echo "Terms: " . $row["TERMS"] . "<br>";
-        echo "Status: " . $row["STATUS"] . "<br>";
-        echo "Date Joined: " . $row["DATEJOIN"] . "<br>";
-        echo "Code: " . $row["code"] . "<br>";
-        echo "OTP: " . $row["OTP"] . "<br>";
-        echo "OTP Timestamp: " . $row["OTP_TIMESTAMP"] . "<br><br>";
+        echo "<tr>";
+        echo "<td>" . $row['Field'] . "</td>";
+        echo "<td>" . $row['Type'] . "</td>";
+        echo "<td>" . $row['Null'] . "</td>";
+        echo "<td>" . $row['Key'] . "</td>";
+        echo "<td>" . $row['Default'] . "</td>";
+        echo "<td>" . $row['Extra'] . "</td>";
+        echo "</tr>";
     }
+    echo "</table>";
 } else {
-    echo "0 results found";
+    echo "Error: " . $conn->error;
 }
 
 // Close the connection
