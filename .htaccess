@@ -1,6 +1,6 @@
 Options +FollowSymLinks
 RewriteEngine On
-RewriteBase /windalehardware.com/
+RewriteBase /
 
 # Simply remove .php extension
 RewriteCond %{REQUEST_FILENAME} !-d
