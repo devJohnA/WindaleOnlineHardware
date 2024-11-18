@@ -149,6 +149,31 @@ switch ($action) {
 		}
 	}
 
+	function doEdit() {
+		if (isset($_POST['save'])) {
+			$user = new User();
+			$user->U_NAME = $_POST['U_NAME'];
+			$user->U_USERNAME = $_POST['U_USERNAME'];
+			$user->U_ROLE = $_POST['U_ROLE'];
+	
+			// Only update the password if it's not empty
+			if (!empty($_POST['U_PASS'])) {
+				$user->U_PASS = password_hash($_POST['U_PASS'], PASSWORD_DEFAULT);
+			}
+	
+	
+			$user->update($_POST['USERID']);
+	
+			$_SESSION['success'] = "User account updated successfully!";
+	
+			if ($_SESSION['USERID'] == $_POST['USERID'] && $_SESSION['U_ROLE'] == 'Staff') {
+				redirect(web_root . "admin/dashboard/index.php");
+			} else {
+				// For admin or when admin edits other accounts	
+				redirect(web_root . "admin/user/index.php");
+			}
+		}
+	}
 
 
 
