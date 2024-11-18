@@ -181,7 +181,7 @@ $notificationCount = $result->num_rows;
                                             </li>
                                             <?php } ?>
                                             <li><a class="dropdown-item"
-                                                    href="<?php echo web_root; ?>admin/logout.php" id="logoutLink">Log
+                                                    href="<?php echo web_root; ?>admin/logout" id="logoutLink">Log
                                                     Out</a></li>
                                         </ul>
                                     </div>
