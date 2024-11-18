@@ -72,7 +72,7 @@
         <h2>Forgot Password</h2>
         <p>Choose your preferred recovery method:</p>
         <a href="sms/send-otp.php" class="btn-otp">Send SMS OTP</a>
-        <a href="forgot-password.php" class="btn-otp">Send Gmail OTP</a>
+        <a href="forgot-password" class="btn-otp">Send Gmail OTP</a>
         <div class="instructions">
             <p>If you have any trouble, just chat with our Admin support!</p>
         </div>
