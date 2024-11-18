@@ -4,7 +4,7 @@ require_once("../include/initialize.php");
 
 	 if (!isset($_SESSION['USERID'])){
 
-      redirect(web_root."admin/verification.php");
+      redirect(web_root."admin/verification");
 
      } 
 
