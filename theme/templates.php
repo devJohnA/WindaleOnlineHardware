@@ -79,7 +79,7 @@ if (isset($_SESSION['gcCart'])){
                                 <?php if (isset($_SESSION['CUSID'] )) { ?>
                                 <li><a href="<?php echo web_root?>index?q=profile" class="<?php echo isActive('profile', $view); ?>"><i class="fa fa-user"></i>
                                         Account</a></li>
-                                <li><a href="<?php echo web_root?>logout.php" id="logoutLink"><i class="fa fa-lock"></i> Logout</a></li>
+                                <li><a href="<?php echo web_root?>logout" id="logoutLink"><i class="fa fa-lock"></i> Logout</a></li>
                                 <?php }else{ ?>
                                 <li><a href="onlinecustomer/index"><i class="fa fa-users"></i>
                                         Customer </a></li>
@@ -333,7 +333,7 @@ if (isset($_SESSION['gcCart'])){
     }).then((result) => {
         if (result.isConfirmed) {
             // If user confirms, send AJAX request to logout.php
-            fetch('<?php echo web_root?>logout.php', {
+            fetch('<?php echo web_root?>logout', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -348,7 +348,7 @@ if (isset($_SESSION['gcCart'])){
                         'success'
                     ).then(() => {
                         // Redirect to home page or login page
-                        window.location.href = '<?php echo web_root?>index.php';
+                        window.location.href = '<?php echo web_root?>index';
                     });
                 } else {
                     Swal.fire(
