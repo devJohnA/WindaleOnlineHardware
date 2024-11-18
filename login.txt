@@ -141,7 +141,10 @@ if(isset($_POST['sidebarLogin'])){
 }
 
 
+
 define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
+define('MAX_LOGIN_ATTEMPTS', 3);
+define('LOCKOUT_TIME', 15); // Minutes
 
 function verifyRecaptcha($recaptcha_response) {
     $url = 'https://www.google.com/recaptcha/api/siteverify';
@@ -166,7 +169,6 @@ function verifyRecaptcha($recaptcha_response) {
     return $captcha_success;
 }
 
-
 function containsSqlInjection($str) {
     // Allow common email characters
     $str = preg_replace('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '', $str);
@@ -190,6 +192,41 @@ function logSqlInjectionAttempt($ip_address) {
     $mydb->executeQuery();
 }
 
+function checkLoginAttempts($email) {
+    global $mydb;
+    $mydb->setQuery("SELECT attempts, last_attempt FROM tblcustomer WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
+    $result = $mydb->loadSingleResult();
+    
+    if ($result) {
+        if ($result->attempts >= MAX_LOGIN_ATTEMPTS) {
+            $lockout_time = strtotime($result->last_attempt) + (LOCKOUT_TIME * 60);
+            if (time() < $lockout_time) {
+                $remaining_time = ceil(($lockout_time - time()) / 60);
+                return array(
+                    'locked' => true,
+                    'remaining_time' => $remaining_time
+                );
+            } else {
+                // Reset attempts after lockout period
+                $mydb->setQuery("UPDATE tblcustomer SET attempts = 0, last_attempt = NULL WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
+                $mydb->executeQuery();
+            }
+        }
+    }
+    return array('locked' => false);
+}
+
+function incrementLoginAttempts($email) {
+    global $mydb;
+    $mydb->setQuery("UPDATE tblcustomer SET attempts = COALESCE(attempts, 0) + 1, last_attempt = NOW() WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
+    $mydb->executeQuery();
+}
+
+function resetLoginAttempts($email) {
+    global $mydb;
+    $mydb->setQuery("UPDATE tblcustomer SET attempts = 0, last_attempt = NULL WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
+    $mydb->executeQuery();
+}
 
 header('Content-Type: application/json');
 
@@ -219,63 +256,82 @@ if(isset($_POST['modalLogin'])) {
         exit;
     }
    
-   if ($email == '' OR $upass == '') {
-       echo json_encode([
-           'status' => 'error',
-           'message' => 'Invalid Username and Password!'
-       ]);
-       exit;
-   } else {
-       $h_upass = sha1($upass);
-       
-       global $mydb;
-       $mydb->setQuery("SELECT * FROM `tblcustomer` WHERE `CUSUNAME` = '" . $mydb->escape_value($email) . "' AND `CUSPASS` = '" . $mydb->escape_value($h_upass) . "'");
-       $cur = $mydb->executeQuery();
-       
-       if($mydb->num_rows($cur) > 0) {
-           $customer_data = $mydb->loadSingleResult();
-           
-           if (!empty($customer_data->code)) {
-               echo json_encode([
-                   'status' => 'error',
-                   'message' => 'Please verify your email address first.'
-               ]);
-               exit;
-           }
-           
-           $_SESSION['CUSID'] = $customer_data->CUSTOMERID;
-           $_SESSION['CUSNAME'] = $customer_data->FNAME . ' ' . $customer_data->LNAME;
-           
-           if(empty($_POST['proid'])) {
-               echo json_encode([
-                   'status' => 'success',
-                   'message' => 'Login successful!',
-                   'redirect' => web_root . "index.php"
-               ]);
-           } else {
-               $proid = $_POST['proid'];
-               $cusid = $_SESSION['CUSID'];
-               $mydb->setQuery("INSERT INTO `tblwishlist` (`PROID`, `CUSID`, `WISHDATE`, `WISHSTATS`)
-                                VALUES ('$proid', '$cusid', NOW(), 0)");
-               $mydb->executeQuery();
-               
-               echo json_encode([
-                   'status' => 'success',
-                   'message' => 'Login successful!',
-                   'redirect' => web_root . "index.php?q=profile"
-               ]);
-           }
-       } else {
-           echo json_encode([
-               'status' => 'error',
-               'message' => 'Invalid Username and Password!'
-           ]);
-       }
-   }
+    if ($email == '' OR $upass == '') {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Invalid Username and Password!'
+        ]);
+        exit;
+    }
+
+    // Check if account is locked
+    $attempt_check = checkLoginAttempts($email);
+    if ($attempt_check['locked']) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => "Your account is temporarily locked. Please try again later."
+        ]);
+        exit;
+    }
+
+    $mydb->setQuery("SELECT * FROM `tblcustomer` WHERE `CUSUNAME` = '" . $mydb->escape_value($email) . "'");
+    $cur = $mydb->executeQuery();
+
+    if ($mydb->num_rows($cur) > 0) {
+        $customer_data = $mydb->loadSingleResult();
+
+        if (password_verify($upass, $customer_data->CUSPASS)) {
+            if (!empty($customer_data->code)) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Please verify your email address first.'
+                ]);
+                exit;
+            }
+
+            // Reset login attempts on successful login
+            resetLoginAttempts($email);
+
+            $_SESSION['CUSID'] = $customer_data->CUSTOMERID;
+            $_SESSION['CUSNAME'] = $customer_data->FNAME . ' ' . $customer_data->LNAME;
+
+            if (empty($_POST['proid'])) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Login successful!',
+                    'redirect' => web_root . "index.php"
+                ]);
+            } else {
+                $proid = $_POST['proid'];
+                $cusid = $_SESSION['CUSID'];
+                $mydb->setQuery("INSERT INTO `tblwishlist` (`PROID`, `CUSID`, `WISHDATE`, `WISHSTATS`) VALUES ('$proid', '$cusid', NOW(), 0)");
+                $mydb->executeQuery();
+
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Login successful!',
+                    'redirect' => web_root . "index.php?q=profile"
+                ]);
+            }
+        } else {
+            // Increment failed login attempts
+            incrementLoginAttempts($email);
+            
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Invalid Username and Password!'
+            ]);
+        }
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Invalid Username and Password!'
+        ]);
+    }
 } else {
-   echo json_encode([
-       'status' => 'error',
-       'message' => 'Invalid request'
-   ]);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Invalid request'
+    ]);
 }
 ?>

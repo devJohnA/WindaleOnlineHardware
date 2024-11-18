@@ -146,6 +146,9 @@ define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
 define('MAX_LOGIN_ATTEMPTS', 3);
 define('LOCKOUT_TIME', 15); // Minutes
 
+session_start();
+
+// Function to verify reCAPTCHA response
 function verifyRecaptcha($recaptcha_response) {
     $url = 'https://www.google.com/recaptcha/api/siteverify';
     $data = array(
@@ -169,6 +172,7 @@ function verifyRecaptcha($recaptcha_response) {
     return $captcha_success;
 }
 
+// Function to check for SQL injection in user input
 function containsSqlInjection($str) {
     // Allow common email characters
     $str = preg_replace('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '', $str);
@@ -186,46 +190,56 @@ function containsSqlInjection($str) {
     return false;
 }
 
+// Function to log SQL injection attempts (for security purposes)
 function logSqlInjectionAttempt($ip_address) {
     global $mydb;
     $mydb->setQuery("INSERT INTO `tbl_sql_injection_logs` (`ip_address`, `attempt_date`) VALUES ('" . $mydb->escape_value($ip_address) . "', NOW())");
     $mydb->executeQuery();
 }
 
+// Function to check the login attempts for the email
 function checkLoginAttempts($email) {
-    global $mydb;
-    $mydb->setQuery("SELECT attempts, last_attempt FROM tblcustomer WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
-    $result = $mydb->loadSingleResult();
-    
-    if ($result) {
-        if ($result->attempts >= MAX_LOGIN_ATTEMPTS) {
-            $lockout_time = strtotime($result->last_attempt) + (LOCKOUT_TIME * 60);
+    // Check if there are attempts stored in the session
+    if (isset($_SESSION['login_attempts'][$email])) {
+        $attempts = $_SESSION['login_attempts'][$email]['attempts'];
+        $last_attempt = $_SESSION['login_attempts'][$email]['last_attempt'];
+
+        if ($attempts >= MAX_LOGIN_ATTEMPTS) {
+            $lockout_time = strtotime($last_attempt) + (LOCKOUT_TIME * 60);
             if (time() < $lockout_time) {
+                // User is locked out, calculate remaining time
                 $remaining_time = ceil(($lockout_time - time()) / 60);
                 return array(
                     'locked' => true,
                     'remaining_time' => $remaining_time
                 );
             } else {
-                // Reset attempts after lockout period
-                $mydb->setQuery("UPDATE tblcustomer SET attempts = 0, last_attempt = NULL WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
-                $mydb->executeQuery();
+                // Reset attempts after lockout period has passed
+                $_SESSION['login_attempts'][$email]['attempts'] = 0;
+                $_SESSION['login_attempts'][$email]['last_attempt'] = null;
             }
         }
     }
+
     return array('locked' => false);
 }
 
+// Function to increment login attempts in session
 function incrementLoginAttempts($email) {
-    global $mydb;
-    $mydb->setQuery("UPDATE tblcustomer SET attempts = COALESCE(attempts, 0) + 1, last_attempt = NOW() WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
-    $mydb->executeQuery();
+    if (!isset($_SESSION['login_attempts'][$email])) {
+        $_SESSION['login_attempts'][$email] = array(
+            'attempts' => 0,
+            'last_attempt' => null
+        );
+    }
+
+    $_SESSION['login_attempts'][$email]['attempts']++;
+    $_SESSION['login_attempts'][$email]['last_attempt'] = date('Y-m-d H:i:s');
 }
 
+// Function to reset login attempts
 function resetLoginAttempts($email) {
-    global $mydb;
-    $mydb->setQuery("UPDATE tblcustomer SET attempts = 0, last_attempt = NULL WHERE CUSUNAME = '" . $mydb->escape_value($email) . "'");
-    $mydb->executeQuery();
+    unset($_SESSION['login_attempts'][$email]);
 }
 
 header('Content-Type: application/json');
@@ -246,6 +260,7 @@ if(isset($_POST['modalLogin'])) {
         exit;
     }
 
+    // Check for SQL Injection
     if (containsSqlInjection($email) || containsSqlInjection($upass)) {
         logSqlInjectionAttempt($ip_address);
         echo json_encode([
@@ -255,7 +270,8 @@ if(isset($_POST['modalLogin'])) {
         ]);
         exit;
     }
-   
+
+    // Validate email and password fields
     if ($email == '' OR $upass == '') {
         echo json_encode([
             'status' => 'error',
@@ -264,16 +280,17 @@ if(isset($_POST['modalLogin'])) {
         exit;
     }
 
-    // Check if account is locked
+    // Check if account is locked due to too many failed login attempts
     $attempt_check = checkLoginAttempts($email);
     if ($attempt_check['locked']) {
         echo json_encode([
             'status' => 'error',
-            'message' => "Your account is temporarily locked. Please try again later."
+            'message' => "Your account is temporarily locked. Please try again in " . $attempt_check['remaining_time'] . " minutes."
         ]);
         exit;
     }
 
+    // Query the database for the user
     $mydb->setQuery("SELECT * FROM `tblcustomer` WHERE `CUSUNAME` = '" . $mydb->escape_value($email) . "'");
     $cur = $mydb->executeQuery();
 
@@ -281,14 +298,6 @@ if(isset($_POST['modalLogin'])) {
         $customer_data = $mydb->loadSingleResult();
 
         if (password_verify($upass, $customer_data->CUSPASS)) {
-            if (!empty($customer_data->code)) {
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Please verify your email address first.'
-                ]);
-                exit;
-            }
-
             // Reset login attempts on successful login
             resetLoginAttempts($email);
 
