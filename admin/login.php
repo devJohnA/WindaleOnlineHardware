@@ -39,6 +39,11 @@ if (isset($_SESSION['USERID'])) {
     redirect(web_root . "admin/index.php");
 }
 
+if (!isset($_SESSION['USERID']) && (!isset($_SESSION['2fa_verified']) || $_SESSION['2fa_verified'] !== true)) {
+    header('Location: authenticator');
+    exit;
+}
+
 // Initialize or retrieve login attempt session variables
 if (!isset($_SESSION['login_attempts'])) {
     $_SESSION['login_attempts'] = 0;
@@ -120,11 +125,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-if (isset($_SESSION['2fa_verified']) && $_SESSION['2fa_verified'] === true) {
-    $msg = 'You have successfully authenticated! You can now proceed to login.';
-    // Reset 2FA verification after showing the message
-    unset($_SESSION['2fa_verified']);
-}
 ?>
 
 

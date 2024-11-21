@@ -1,9 +1,15 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['verified_email'])) {
-    // If the email is not verified, redirect to the verification page
-    header('Location: verification.php');
+// Prevent direct access to authenticator without email verification
+if (!isset($_SESSION['email_verified']) || $_SESSION['email_verified'] !== true) {
+    header('Location: verification');
+    exit;
+}
+
+// Prevent accessing authenticator if already 2FA verified
+if (isset($_SESSION['2fa_verified']) && $_SESSION['2fa_verified'] === true) {
+    header('Location: login');
     exit;
 }
 ?>

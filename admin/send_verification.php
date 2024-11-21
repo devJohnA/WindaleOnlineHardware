@@ -141,6 +141,10 @@ try {
 
     // Send email
     $mail->send();
+
+    
+    $_SESSION['email_verified'] = true;
+    $_SESSION['verified_email'] = $email;
     
     echo json_encode([
         'success' => true,
