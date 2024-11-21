@@ -92,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($res === true) {
             // Reset login attempts on successful login
             $_SESSION['login_attempts'] = 0;
+            unset($_SESSION['2fa_verified']);
 
             echo json_encode([
                 'status' => 'success',
