@@ -14,13 +14,13 @@ $cur = $mydb->loadResultList();
 
 foreach ($cur as $result) { ?>
 <div id="contact-page" class="container">
-    <div class="bg">
+    <!-- <div class="bg">
         <div class="row">
             <div class="col-sm-12">
                 <h2 class="title text-center">Contact <strong>Us</strong></h2>
             </div>
         </div>
-    </div>
+    </div> -->
     <div class="row">
 
         <div class="col-sm-5">
