@@ -125,25 +125,59 @@ $con = mysqli_connect('localhost', 'u510162695_dried', '1Dried_password', 'u5101
     }
 
     //if user click change password button
-    if(isset($_POST['change-password'])){
+    function validatePassword($password) {
+        if (strlen($password) < 8) {
+            return "Password must be at least 8 characters long.";
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            return "Password must contain at least one uppercase letter.";
+        }
+        if (!preg_match('/[a-z]/', $password)) {
+            return "Password must contain at least one lowercase letter.";
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            return "Password must contain at least one number.";
+        }
+        if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+            return "Password must contain at least one special character.";
+        }
+        return true;
+    }
+    
+    if(isset($_POST['change-password'])) {
         $_SESSION['info'] = "";
         $password = mysqli_real_escape_string($con, $_POST['password']);
         $cpassword = mysqli_real_escape_string($con, $_POST['cpassword']);
-        if($password !== $cpassword){
+        
+        // First validate password strength
+        $passwordValidation = validatePassword($password);
+        if ($passwordValidation !== true) {
+            $errors['password'] = $passwordValidation;
+        }
+        // Then check if passwords match
+        else if($password !== $cpassword) {
             $errors['password'] = "Confirm password not matched!";
-        }else{
+        }
+        // If all validations pass, proceed with password update
+        else {
             $code = 0;
             $email = $_SESSION['CUSUNAME']; //getting this email using session
             $encpass = password_hash($password, PASSWORD_BCRYPT);
-            $update_pass = "UPDATE tblcustomer SET ZIPCODE = $code, CUSPASS = '$encpass' WHERE CUSUNAME = '$email'";
-            $run_query = mysqli_query($con, $update_pass);
-            if($run_query){
+            
+            // Add error handling for SQL injection prevention
+            $stmt = mysqli_prepare($con, "UPDATE tblcustomer SET ZIPCODE = ?, CUSPASS = ? WHERE CUSUNAME = ?");
+            mysqli_stmt_bind_param($stmt, "iss", $code, $encpass, $email);
+            $run_query = mysqli_stmt_execute($stmt);
+            
+            if($run_query) {
                 $info = "Your password has been reset. You can now login with your new password.";
                 $_SESSION['info'] = $info;
-                header('Location: ../onlinecustomer/backtologin.php');
-            }else{
+                header('Location: ../onlinecustomer/backtologin');
+                exit(); // Add exit after redirect
+            } else {
                 $errors['db-error'] = "Failed to change your password!";
             }
+            mysqli_stmt_close($stmt);
         }
     }
     

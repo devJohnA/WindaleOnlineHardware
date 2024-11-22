@@ -16,32 +16,70 @@ ini_set('display_errors', 1);
         $lname = $conn->real_escape_string($_POST['LNAME']);
         $cityadd = $conn->real_escape_string($_POST['CITYADD']);
         $lmark = $conn->real_escape_string($_POST['LMARK']);
-        // $gender = $conn->real_escape_string($_POST['GENDER']);
         $phone = $conn->real_escape_string($_POST['PHONE']);
         $cusuname = $conn->real_escape_string($_POST['CUSUNAME']);
-        $password = password_hash($_POST['CUSPASS'], PASSWORD_DEFAULT);
+        $password = $_POST['CUSPASS']; // Get raw password for validation
         $term = 1;
         $datejoin = date('Y-m-d H:i:s');
         $code = $conn->real_escape_string(md5(rand()));
-
+    
+        // Password validation function
+        function validatePassword($password) {
+            // Minimum length of 8 characters
+            if (strlen($password) < 8) {
+                return "Password must be at least 8 characters long.";
+            }
+            // Must contain at least one uppercase letter
+            if (!preg_match('/[A-Z]/', $password)) {
+                return "Password must contain at least one uppercase letter.";
+            }
+            // Must contain at least one lowercase letter
+            if (!preg_match('/[a-z]/', $password)) {
+                return "Password must contain at least one lowercase letter.";
+            }
+            // Must contain at least one number
+            if (!preg_match('/[0-9]/', $password)) {
+                return "Password must contain at least one number.";
+            }
+            // Must contain at least one special character
+            if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+                return "Password must contain at least one special character.";
+            }
+            return true;
+        }
+    
         // Validate email
-    if (!filter_var($cusuname, FILTER_VALIDATE_EMAIL)) {
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Please enter a valid email address.'
-            });
-        </script>";
-        exit;
-    }
-
+        if (!filter_var($cusuname, FILTER_VALIDATE_EMAIL)) {
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter a valid email address.'
+                });
+            </script>";
+            exit;
+        }
+    
+        // Validate password
+        $passwordValidation = validatePassword($password);
+        if ($passwordValidation !== true) {
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Password',
+                    text: '$passwordValidation'
+                });
+            </script>";
+            exit;
+        }
+    
         if (mysqli_num_rows(mysqli_query($conn, "SELECT * FROM tblcustomer WHERE CUSUNAME='{$cusuname}'")) > 0) {
             $msg = "<div class='alert alert-danger'>{$cusuname} - This username already exists.</div>";
         } else {    
-                $sql = "INSERT INTO tblcustomer (FNAME, LNAME, CITYADD, LMARK, PHONE, CUSUNAME, CUSPASS, TERMS, DATEJOIN, code) 
-                        VALUES ('$fname', '$lname', '$cityadd', '$lmark', '$phone', '$cusuname', '$password', '$term', '$datejoin', '$code')";
-                $result = mysqli_query($conn, $sql);
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $sql = "INSERT INTO tblcustomer (FNAME, LNAME, CITYADD, LMARK, PHONE, CUSUNAME, CUSPASS, TERMS, DATEJOIN, code) 
+                    VALUES ('$fname', '$lname', '$cityadd', '$lmark', '$phone', '$cusuname', '$hashedPassword', '$term', '$datejoin', '$code')";
+            $result = mysqli_query($conn, $sql);
 
                 if ($result) {
                     echo "<div style='display: none;'>";
@@ -88,203 +126,334 @@ ini_set('display_errors', 1);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        html, body {
-            background-color: #faf9f6;
-            margin: 0;
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         .signup-container {
-            max-width: 500px;
-            width: 90%;
-            padding: 2rem;
-            background-color: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            margin: 1rem;
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .signup-header h2 {
+            color: #333;
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .signup-header p {
+            color: #666;
+            margin-bottom: 0;
+            font-size: 0.85rem;
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            height: auto;
+        }
+
+        .form-control:focus {
+            border-color: #fd2323;
+            box-shadow: 0 0 0 0.2rem rgba(253, 35, 35, 0.1);
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.2rem;
+        }
+
+        .example-text {
+            font-size: 0.7rem;
+            color: #888;
+            margin-bottom: 0.2rem;
+        }
+
+        .password-requirements {
+            margin-top: 0.3rem;
+        }
+
+        .requirement {
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 0.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .requirement i {
+            margin-right: 0.3rem;
+            font-size: 0.65rem;
+        }
+
+        .requirement.valid {
+            color: #28a745;
+        }
+
+        .requirement.invalid {
+            color: #dc3545;
+        }
+
+        .btn-signup {
+            background: #fd2323;
+            border: none;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 0.8rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .btn-signup:hover {
+            background: #e61e1e;
+        }
+
+        .terms-check {
+            margin-top: 0.8rem;
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .terms-check a {
+            color: #fd2323;
+            text-decoration: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #fd2323;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .input-group {
             position: relative;
-            z-index: 2;
+            margin-bottom: 0.8rem;
         }
-        .btn-danger {
-            background-color: #fd2323;
-        }
-        .btn-danger:hover {
-            background-color: #f71d1d;
-        }
-        .password-container {
-            position: relative;
-        }
+
         .password-toggle {
             position: absolute;
-            top: 50%;
-            right: 10px;
+            right: 0.8rem;
+            top: 40%;
             transform: translateY(-50%);
+            color: #666;
             cursor: pointer;
-        }
-        .start-end {
-            text-align: right;
-        }
-        .terms{
-            cursor:pointer;
+            z-index: 10;
         }
 
-        .custom-shape-divider-top-1728099492 {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            overflow: hidden;
-            line-height: 0;
-            transform: rotate(180deg);
-            z-index: 1;
+        textarea.form-control {
+            min-height: 45px;
+            resize: vertical;
         }
 
-        .custom-shape-divider-top-1728099492 svg {
-            position: relative;
-            display: block;
-            width: calc(173% + 1.3px);
-            height: 345px;
+        .row {
+            margin-left: -0.5rem;
+            margin-right: -0.5rem;
         }
 
-        .custom-shape-divider-top-1728099492 .shape-fill {
-            fill: #FD2323;
+        .col-md-6 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
         }
     </style>
 </head>
 <body>
-<div class="custom-shape-divider-top-1728099492">
-    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-        <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
-    </svg>
-</div>
     <div class="signup-container">
-        <h2 class="text-center mb-3">Sign Up</h2>
-        <p class="text-center mb-4">Please fill in the details to sign up!</p>
-        <?php echo $msg; ?>
-        <form id="signupForm" action="" name="personal" method="POST" enctype="multipart/form-data">
-        <input class="proid" type="hidden" name="proid" id="proid" value="">
-            <div class="row mb-3">
-                <div class="col">
-                    <input type="text"  id="FNAME" name="FNAME" class="form-control" placeholder="First name" required>
-                </div>
-                <div class="col">
-                    <input type="text" id="LNAME" name="LNAME" class="form-control" placeholder="Last name" required>
-                </div>
-            </div>
-            <!-- <div class="mb-3">
-                <select  id="GENDER" name="GENDER" class="form-select" required>
-                    <option value="" selected disabled>Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-            </div> -->
-            <p class="text-left">Ex: Burgos St. Mancilang, Madridejos Cebu.</p>
-            <div class="mb-3">
-                <textarea class="form-control" id="CITYADD" name="CITYADD" rows="3" placeholder="Street/Brgy./Municipality/Province" value=""  required></textarea>
-            </div>
-            <p class="text-left">Ex: Next to the City Hall</p>
-            <div class="mb-3">
-                <textarea class="form-control" id="LMARK" name="LMARK" rows="2" placeholder="Landmarks" value=""  required></textarea>
-            </div>
-            <p class="text-left">Ex: johndoe@gmail.com</p>
-            <div class="mb-3">
-                <input type="email"  id="CUSUNAME" name="CUSUNAME" class="form-control" placeholder="Email" required oninput="validateEmail()" required>
-            </div>
-            <div class="mb-3 password-container">
-                <input type="password" class="form-control" id="CUSPASS" name="CUSPASS" placeholder="Password" required>
-                <span class="password-toggle" onclick="togglePassword()">
-                    <i class="fas fa-eye" id="toggleIcon"></i>
-                </span>
-            </div>
-            <p class="text-left">Ex: 09692870485</p>
-<div class="mb-3">
-  <input type="tel" id="PHONE" name="PHONE" value="" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" class="form-control" placeholder="Contact Number" required oninput="this.value = this.value.replace(/\D/g, '').slice(0, 11);">
-</div>
+        <div class="signup-header">
+            <h2>Sign Up</h2>
+            <p>Please fill in the details to sign up!</p>
+        </div>
 
-            <div class="mb-3">
-            <input type="checkbox" id="conditionterms" name="conditionterms"
-                                                             value="checkbox" required>
-                                                         By <small>clicking this box, you are agreeing the <a
-                                                                 class="toggle-modal"
-                                                                 onclick=" OpenPopupCenter('../customer/terms.php','Terms And Conditions','600','600')"><b class="terms">Terms
-                                                                     and conditions</b></a></small>
+        <form action="" method="POST"  name="personal"  id="signupForm">
+        <?php echo $msg; ?>
+            <div class="row">
+                <div class="col-6 mb-2">
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="FNAME" class="form-control" required>
+                </div>
+                <div class="col-6 mb-2">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" name="LNAME" class="form-control" required>
+                </div>
             </div>
-            <button type="submit" name="submit" class="btn btn-danger w-100 mb-3">Sign Up</button>
-            <p class="text-center mb-0">Already have an account? <a href="index.php" class="text-danger">Sign In</a></p>
+
+            <div class="mb-2">
+                <label class="form-label">Address</label>
+                <div class="example-text">Ex: Burgos St. Mancilang, Madridejos Cebu.</div>
+                <textarea class="form-control" name="CITYADD" required></textarea>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Landmarks</label>
+                <div class="example-text">Ex: Next to the City Hall</div>
+                <textarea class="form-control" name="LMARK" required></textarea>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Email</label>
+                <div class="example-text">Ex: johndoe@gmail.com</div>
+                <input type="email" name="CUSUNAME" class="form-control" required>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" name="CUSPASS" id="password" class="form-control" required>
+                    <span class="password-toggle">
+                        <i class="fas fa-eye" id="togglePassword"></i>
+                    </span>
+                </div>
+                <div class="password-requirements">
+                    <div class="requirement" id="length">
+                        <i class="fas fa-circle"></i> Min. 8 characters
+                    </div>
+                    <div class="requirement" id="uppercase">
+                        <i class="fas fa-circle"></i> One uppercase
+                    </div>
+                    <div class="requirement" id="lowercase">
+                        <i class="fas fa-circle"></i> One lowercase
+                    </div>
+                    <div class="requirement" id="number">
+                        <i class="fas fa-circle"></i> One number
+                    </div>
+                    <div class="requirement" id="special">
+                        <i class="fas fa-circle"></i> One special char
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Contact Number</label>
+                <div class="example-text">Ex: 09692870485</div>
+                <input type="tel" name="PHONE" pattern="[0-9]{11}" maxlength="11" class="form-control" required>
+            </div>
+
+            <div class="terms-check">
+                <input type="checkbox" required id="terms">
+                <label for="terms">I agree to the <a href="javascript:void(0)" onclick="
+    const width = 600;
+    const height = 600;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    window.open('../customer/terms.php', 'Terms', 
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
+    );
+">Terms and conditions</a></label>
+            </div>
+
+            <button type="submit"  name="submit" class="btn btn-signup">Sign Up</button>
+
+            <div class="login-link">
+                Already have an account? <a href="index.php">Sign In</a>
+            </div>
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('CUSPASS');
-            const toggleIcon = document.getElementById('toggleIcon');
+        // Password visibility toggle
+        document.querySelector('.password-toggle').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i');
             
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
+                password.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
-        }
+        });
 
-        function OpenPopupCenter(pageURL, title, w, h) {
-    var left = (screen.width - w) / 2;
-    var top = (screen.height - h) / 4; // for 25% - devide by 4  |  for 33% - devide by 3
-    var targetWin = window.open(pageURL, title,
-        'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' +
-        w + ', height=' + h + ', top=' + top + ', left=' + left);
-}
+        // Password validation
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+            
+            for (const [requirement, valid] of Object.entries(requirements)) {
+                const element = document.getElementById(requirement);
+                element.className = 'requirement ' + (valid ? 'valid' : 'invalid');
+                const icon = element.querySelector('i');
+                if (valid) {
+                    icon.className = 'fas fa-check-circle';
+                } else {
+                    icon.className = 'fas fa-circle';
+                }
+            }
+        });
 
-// document.getElementById('signupForm').addEventListener('submit', function(e) {
-//     e.preventDefault();
+        // Phone number validation
+        document.querySelector('input[name="PHONE"]').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 11);
+        });
+
+        const form = document.getElementById('signupForm');
+form.addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
     
-//     let formData = new FormData(this);
-//     formData.append('submit', 'true'); // Add this line to ensure 'submit' is sent
-
-//     fetch('../customer/controller.php?action=add', {
-//         method: 'POST',
-//         body: formData
-//     })
-//     .then(response => response.text())
-//     .then(text => {
-//         console.log('Raw server response:', text);
-//         return JSON.parse(text);
-//     })
-//     .then(data => {
-//         if (data.status === 'info') {
-//             Swal.fire({
-//                 icon: 'info',
-//                 title: 'Oops...',
-//                 text: data.message,
-//             });
-//         } else if (data.status === 'success') {
-//             Swal.fire({
-//                 icon: 'success',
-//                 title: 'Success!',
-//                 text: data.message,
-//                 showConfirmButton: false,
-//                 timer: 1500
-//             }).then(() => {
-//                 window.location.href = data.redirect;
-//             });
-//         }
-//     })
-//     .catch(error => {
-//         console.error('Error:', error);
-//         Swal.fire({
-//             icon: 'error',
-//             title: 'Oops...',
-//             text: 'Something went wrong: ' + error.message,
-//         });
-//     });
-// });
+    // Check all password requirements
+    const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+    
+    // Check if any requirement is not met
+    const hasInvalidRequirement = Object.values(requirements).includes(false);
+    
+    if (hasInvalidRequirement) {
+        e.preventDefault(); // Prevent form submission
+        
+        // Show error message using SweetAlert
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Password',
+            text: 'Please ensure all password requirements are met.',
+            confirmButtonColor: '#fd2323'
+        });
+        
+        // Focus on password field
+        document.getElementById('password').focus();
+    }
+});
 
     </script>
 </body>
