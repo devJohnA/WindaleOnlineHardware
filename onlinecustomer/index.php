@@ -134,13 +134,13 @@ $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
                 </span>
             </div>
             <div class="text-end mb-3">
-                <a href="choose-forgotpass.php" class="text text-decoration-none">Forgot password?</a>
+                <a href="choose-forgotpass" class="text text-decoration-none">Forgot password?</a>
             </div>
             <button type="submit" id="modalLogin" name="modalLogin" class="btn btn-danger w-100 mb-3">Sign in</button>
             <p class="text-center mb-0">Not a member? <a href="signup" class="text-danger">Signup</a></p>
         </form>
         <p class="text-center mt-1">
-            <a href="../index.php" class="text-dark text-decoration-none">Back to Home Page</a>
+            <a href="../index" class="text-dark text-decoration-none">Back to Home Page</a>
         </p>
     </div>
     

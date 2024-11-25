@@ -4,7 +4,7 @@ session_start();
 
 // Ensure user has verified OTP before they can reset the password
 if (!isset($_SESSION['otp_verified']) || $_SESSION['otp_verified'] !== true) {
-    header("Location: verify_otp.php");
+    header("Location: verify_otp");
     exit();
 }
 
