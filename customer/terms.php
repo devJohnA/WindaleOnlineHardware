@@ -20,14 +20,14 @@
               <strong>Pricing and Payments:</strong>
               <ul>
                 <li>
-                  All prices displayed on our website are in [Currency] and are
+                  All prices displayed on our website are in PHP and are
                   subject to change without notice.
                 </li>
                 <li>
                   Payment must be made in full at the time of order placement.
                 </li>
                 <li>
-                  Acceptable payment methods include [list payment methods].
+                  Acceptable payment methods include Gcash .
                 </li>
               </ul>
             </li>
@@ -35,7 +35,7 @@
               <strong>Shipping and Delivery:</strong>
               <ul>
                 <li>
-                  We aim to ship all orders within [number] business days of
+                  We aim to ship all orders within 09692870485 business days of
                   receipt.
                 </li>
                 <li>
