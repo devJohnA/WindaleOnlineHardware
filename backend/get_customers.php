@@ -1,6 +1,6 @@
 <?php
-header('Access-Control-Allow-Origin: *'); 
-header('Content-Type: application/json'); 
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
 
 $servername = "localhost";
 $username = "u510162695_dried";
@@ -20,10 +20,14 @@ $result = $conn->query($sql);
 
 $customers = [];
 while ($row = $result->fetch_assoc()) {
-    $customers[] = $row;
+    $customers[] = [
+        "id" => $row['id'],
+        "first_name" => htmlspecialchars($row['first_name'], ENT_QUOTES, 'UTF-8'),
+        "last_name" => htmlspecialchars($row['last_name'], ENT_QUOTES, 'UTF-8'),
+        "signup_date" => htmlspecialchars($row['signup_date'], ENT_QUOTES, 'UTF-8'),
+    ];
 }
 
-// Send total count and customer data
 $response = [
     "total_signups" => count($customers),
     "customers" => $customers
