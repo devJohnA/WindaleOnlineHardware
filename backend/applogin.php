@@ -1,29 +1,43 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Database connection
+// Database connection parameters
+
 $servername = "localhost";
 $username = "u510162695_dried";
 $password = "1Dried_password";
 $dbname = "u510162695_dried";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername, $db_username, $db_password, $dbname);
 
 // Check connection
 if ($conn->connect_error) {
     die(json_encode([
         "success" => false, 
-        "message" => "Connection failed: " . $conn->connect_error
+        "message" => "Database Connection Failed: " . $conn->connect_error
     ]));
 }
 
-// Get POST data
-$data = json_decode(file_get_contents("php://input"), true);
+// Get raw POST data
+$json = file_get_contents('php://input');
+$data = json_decode($json, true);
+
+// Validate input
+if (!isset($data['username']) || !isset($data['password'])) {
+    echo json_encode([
+        "success" => false,
+        "message" => "Missing username or password"
+    ]);
+    exit;
+}
 
 $username = $conn->real_escape_string($data['username']);
 $provided_password = $data['password'];
@@ -38,7 +52,7 @@ $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     $user = $result->fetch_assoc();
     
-    // Verify password using password_verify
+    // Verify password 
     if (password_verify($provided_password, $user['U_PASS'])) {
         echo json_encode([
             "success" => true,
