@@ -11,8 +11,8 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 // Database connection parameters
 
 $servername = "localhost";
-$username = "u510162695_dried";
-$password = "1Dried_password";
+$db_username = "u510162695_dried";
+$db_password = "1Dried_password";
 $dbname = "u510162695_dried";
 
 // Create connection
