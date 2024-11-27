@@ -51,7 +51,7 @@ $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     $user = $result->fetch_assoc();
-    
+    // sd
     // Verify password 
     if (password_verify($provided_password, $user['U_PASS'])) {
         echo json_encode([
