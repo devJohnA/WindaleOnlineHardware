@@ -1,7 +1,7 @@
 <?php
-	require '../vendor/autoload.php';
-	use Clarifai\API\ClarifaiClient;
-	use Clarifai\API\Inputs;
+	// require '../vendor/autoload.php';
+	// use Clarifai\API\ClarifaiClient;
+	// use Clarifai\API\Inputs;
 require_once ("../include/initialize.php");
 
 $action = (isset($_GET['action']) && $_GET['action'] != '') ? $_GET['action'] : '';
