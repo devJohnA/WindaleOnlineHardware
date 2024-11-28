@@ -20,7 +20,6 @@ if (isset($_SESSION['success_message'])) {
     unset($_SESSION['success_message']); // Clear the message after displaying
 }
 
-$recaptcha_site_key = '6Lcd0IwqAAAAAEGejXX5BeVp8Hpk7zcHBQxbovxU';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -123,7 +122,8 @@ $recaptcha_site_key = '6Lcd0IwqAAAAAEGejXX5BeVp8Hpk7zcHBQxbovxU';
         <?php endif; ?>
         <form action="../login.php"  method="POST" id="loginForm">
         <input class="proid" type="hidden" name="proid" id="proid" value="">
-        <div class="g-recaptcha" data-sitekey="6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf"></div>
+        <input type="hidden" name="g-recaptcha-response" id="recaptchaResponse">
+        <div class="g-recaptcha" data-sitekey="6Lcd0IwqAAAAAEGejXX5BeVp8Hpk7zcHBQxbovxU"></div>
         <div class="mb-3">
             <div class="mb-3">
                 <input type="email"  id="U_USERNAME"  name="U_USERNAME" class="form-control" placeholder="Email account" required>
@@ -151,9 +151,15 @@ $recaptcha_site_key = '6Lcd0IwqAAAAAEGejXX5BeVp8Hpk7zcHBQxbovxU';
         e.preventDefault();
         
         // Execute reCAPTCHA verification
-        grecaptcha.execute('<?php echo $recaptcha_site_key; ?>', {action: 'login'})
-        .then(function(token) {
-            document.getElementById('recaptchaResponse').value = token;
+        const recaptchaResponse = document.getElementById('recaptchaResponse');
+    if (grecaptcha.getResponse() === '') {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Please complete the reCAPTCHA',
+        });
+        return;
+    }
             
             const formData = new FormData(e.target);
             formData.append('modalLogin', 'true');

@@ -251,6 +251,9 @@ if(isset($_POST['modalLogin'])) {
     $recaptcha_response = $_POST['g-recaptcha-response'];
 
     // Verify reCAPTCHA first
+    $recaptcha_response = $_POST['g-recaptcha-response'];
+    $recaptcha_verify = verifyRecaptcha($recaptcha_response);
+    
     if (!$recaptcha_verify->success) {
         echo json_encode([
             'status' => 'error',
