@@ -249,7 +249,21 @@ if(isset($_POST['modalLogin'])) {
     $upass = trim($_POST['U_PASS']);
     $ip_address = $_SERVER['REMOTE_ADDR'];
     $recaptcha_response = $_POST['g-recaptcha-response'];
-
+    
+    if (containsSqlInjection($email) || containsSqlInjection($upass)) {
+        logSqlInjectionAttempt($ip_address);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Security Breach Detected',
+            'sqlInjection' => true,
+            'html' => '<div style="font-size: 1.2em;">🚨 WARNING: SQL Injection Attempt Detected 🚨</div><br>' .
+                      '<p>Your IP address has been logged and Inserted to Database.</p>' .
+                      '<p>Further attempts will result in immediate account lockout and potential legal action.</p>' .
+                      '<br><div style="font-size: 1.1em; color: #ff0000;">This incident will be investigated thoroughly.</div>',
+            'confirmButtonText' => 'I Understand the Consequences'
+        ]);
+        exit;
+    }
     // Verify reCAPTCHA first
     $recaptcha_response = $_POST['g-recaptcha-response'];
     $recaptcha_verify = verifyRecaptcha($recaptcha_response);
