@@ -19,7 +19,7 @@
             color: #7f8c8d;
         }
         ul {
-            background-color: #f9f9f9;
+            background-color: #fd2323;
             padding: 15px 30px;
             border-radius: 5px;
         }
