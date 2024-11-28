@@ -1,15 +1,7 @@
 <?php
-// Full server path to the image directory
-$image_directory = $_SERVER['DOCUMENT_ROOT'] . '/customer/customer_image/';
-$web_path = '/customer/customer_image/';
+$image_directory = 'customer/customer_image/';
 $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
 
-// Verify directory exists
-if (!is_dir($image_directory)) {
-    die("Image directory does not exist: " . $image_directory);
-}
-
-// Get all image files
 $images = array_filter(scandir($image_directory), function($file) use ($allowed_extensions) {
     $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
     return $file != '.' && $file != '..' && in_array($ext, $allowed_extensions);
@@ -17,42 +9,28 @@ $images = array_filter(scandir($image_directory), function($file) use ($allowed_
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uploaded Images</title>
     <style>
-        .image-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+        .image-grid { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
         }
-        .profile-image {
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .profile-image { 
+            width: 200px; 
+            height: 200px; 
+            object-fit: cover; 
         }
     </style>
 </head>
 <body>
     <div class="image-grid">
-        <?php 
-        if (!empty($images)) {
-            foreach ($images as $image): 
-        ?>
-            <img src="<?php echo htmlspecialchars($web_path . $image); ?>"
-                 alt="<?php echo htmlspecialchars($image); ?>"
+        <?php foreach ($images as $image): ?>
+            <img src="<?= htmlspecialchars($image_directory . $image) ?>" 
                  class="profile-image">
-        <?php 
-            endforeach; 
-        } else {
-            echo "<p>No images found.</p>";
-        }
-        ?>
+        <?php endforeach; ?>
     </div>
 </body>
 </html>
