@@ -202,7 +202,7 @@ $recaptcha_site_key = '6Lcd0IwqAAAAAEGejXX5BeVp8Hpk7zcHBQxbovxU';
                 });
             });
         });
-    });
+
 
     function togglePassword() {
         const passwordInput = document.getElementById('U_PASS');
