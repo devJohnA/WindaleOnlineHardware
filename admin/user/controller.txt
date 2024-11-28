@@ -118,13 +118,6 @@ switch ($action) {
 	
 			try {
 				$user = New User();
-				
-				// Generate a unique 6-digit USERID
-				do {
-					$userId = rand(100000, 999999);
-				} while (User::checkUserIdExists($userId)); // Ensure uniqueness
-				
-				$user->USERID = $userId; // Assign unique ID
 				$user->U_NAME = $_POST['U_NAME'];
 				$user->U_USERNAME = $_POST['U_USERNAME'];
 				$user->U_CON = $_POST['U_CON'];
@@ -133,6 +126,7 @@ switch ($action) {
 				$user->SECRET_KEY = $_POST['secret_key'];
 	
 				if ($user->create()) {
+					// Remove the session message since we're handling it with JSON
 					echo json_encode([
 						'success' => true,
 						'message' => 'New user added successfully! Please configure 2FA.'

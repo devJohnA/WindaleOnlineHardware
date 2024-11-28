@@ -190,7 +190,12 @@ class User {
 
 	}
 
-	
+	public static function checkUserIdExists($userId) {
+		global $mydb;
+		$mydb->setQuery("SELECT * FROM `tbluseraccount` WHERE `USERID` = '" . $mydb->escape_value($userId) . "'");
+		$cur = $mydb->executeQuery();
+		return $mydb->num_rows($cur) > 0;
+	}
 
 	public function create() {
 

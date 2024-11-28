@@ -10,9 +10,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $productStock = $conn->real_escape_string($_POST['productStock']);
     $checkStock = $conn->real_escape_string($_POST['checkStock']);
     $productDate = $conn->real_escape_string($_POST['productDate']);
-    
-    // Generate a random 6-digit ID
-    $productID = random_int(100000, 999999);
 
     // Check if product already exists
     $checkSql = "SELECT COUNT(*) as count FROM stocks WHERE productName = '$productName'";
@@ -35,8 +32,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $conn->begin_transaction();
 
             try {
-                $sql = "INSERT INTO stocks (id, productName, productCategory, productPrice, productStock, checkStock, productDate, images)
-                        VALUES ('$productID', '$productName', '$productCategory', '$productPrice', $productStock, $checkStock, '$productDate', '$fileName')";
+                $sql = "INSERT INTO stocks (productName, productCategory, productPrice, productStock, checkStock, productDate, images)
+                        VALUES ('$productName', '$productCategory', '$productPrice', $productStock, $checkStock, '$productDate', '$fileName')";
                 $conn->query($sql);
 
                 $conn->commit();
