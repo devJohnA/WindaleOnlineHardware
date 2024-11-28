@@ -20,6 +20,7 @@ if (isset($_SESSION['success_message'])) {
     unset($_SESSION['success_message']); // Clear the message after displaying
 }
 
+$recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,8 +33,7 @@ if (isset($_SESSION['success_message'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
+    <script src="https://www.google.com/recaptcha/api.js?render=<?php echo $recaptcha_site_key; ?>"></script>
 
     <style>
         html, body {
@@ -122,12 +122,10 @@ if (isset($_SESSION['success_message'])) {
         <?php endif; ?>
         <form action="../login.php"  method="POST" id="loginForm">
         <input class="proid" type="hidden" name="proid" id="proid" value="">
-        <div class="g-recaptcha" 
-             data-sitekey="6Lcd0IwqAAAAAEGejXX5BeVp8Hpk7zcHBQxbovxU">
-        </div>
+        <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
         <div class="mb-3">
             <div class="mb-3">
-                <input type="email"  id="U_USERNAME"  name="U_USERNAME" class="form-control" placeholder="Email asccount" required>
+                <input type="email"  id="U_USERNAME"  name="U_USERNAME" class="form-control" placeholder="Email account" required>
             </div>
             <div class="mb-3 password-container">
                 <input type="password" name="U_PASS" class="form-control"  id="U_PASS" placeholder="Password">
@@ -148,52 +146,65 @@ if (isset($_SESSION['success_message'])) {
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-     document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Check if reCAPTCHA is solved
-        const recaptchaResponse = grecaptcha.getResponse();
-        if (recaptchaResponse.length === 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'reCAPTCHA Required',
-                text: 'Please complete the reCAPTCHA'
-            });
-            return;
-        }
-
-        const formData = new FormData(this);
-        
-        fetch('login.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Login Successful',
-                    text: data.message
-                }).then(() => {
-                    window.location.href = data.redirect;
-                });
-            } else {
+        // Execute reCAPTCHA verification
+        grecaptcha.execute('<?php echo $recaptcha_site_key; ?>', {action: 'login'})
+        .then(function(token) {
+            document.getElementById('recaptchaResponse').value = token;
+            
+            const formData = new FormData(e.target);
+            formData.append('modalLogin', 'true');
+            
+            fetch('../login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = data.redirect;
+                    });
+                } else if (data.sqlInjection) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Security Breach Detected',
+                        html: '<div style="font-size: 1.2em;">🚨 WARNING: SQL Injection Attempt Detected 🚨</div><br>' +
+                              '<p>Your IP address has been logged and Inserted to Database.</p>' +
+                              '<p>Further attempts will result in immediate account lockout and potential legal action.</p>' +
+                              '<br><div style="font-size: 1.1em; color: #ff0000;">This incident will be investigated thoroughly.</div>',
+                        confirmButtonText: 'I Understand the Consequences',
+                        confirmButtonColor: '#d33',
+                        showCancelButton: false,
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'index.php';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Login Failed',
-                    text: data.message
+                    title: 'Oops...',
+                    text: 'Something went wrong!'
                 });
-                // Reset reCAPTCHA after failed attempt
-                grecaptcha.reset();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Something went wrong'
             });
         });
     });

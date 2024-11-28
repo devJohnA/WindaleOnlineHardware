@@ -142,13 +142,13 @@ if(isset($_POST['sidebarLogin'])){
 
 
 
-define('RECAPTCHA_SECRET_KEY', '6Lcd0IwqAAAAAAj-8fCfpmWcb_IHryttABLiQcbH'); // Your reCAPTCHA v2 Secret Key
+define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
 define('MAX_LOGIN_ATTEMPTS', 3);
 define('LOCKOUT_TIME', 15); // Minutes
 
 session_start();
 
-// Function to verify reCAPTCHA v2 response
+// Function to verify reCAPTCHA response
 function verifyRecaptcha($recaptcha_response) {
     $url = 'https://www.google.com/recaptcha/api/siteverify';
     $data = array(
@@ -248,30 +248,14 @@ if(isset($_POST['modalLogin'])) {
     $email = trim($_POST['U_USERNAME']);
     $upass = trim($_POST['U_PASS']);
     $ip_address = $_SERVER['REMOTE_ADDR'];
-    $recaptcha_response = $_POST['g-recaptcha-response'];
-    
-    if (containsSqlInjection($email) || containsSqlInjection($upass)) {
-        logSqlInjectionAttempt($ip_address);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Security Breach Detected',
-            'sqlInjection' => true,
-            'html' => '<div style="font-size: 1.2em;">🚨 WARNING: SQL Injection Attempt Detected 🚨</div><br>' .
-                      '<p>Your IP address has been logged and Inserted to Database.</p>' .
-                      '<p>Further attempts will result in immediate account lockout and potential legal action.</p>' .
-                      '<br><div style="font-size: 1.1em; color: #ff0000;">This incident will be investigated thoroughly.</div>',
-            'confirmButtonText' => 'I Understand the Consequences'
-        ]);
-        exit;
-    }
+    $recaptcha_response = $_POST['recaptcha_response'];
+
     // Verify reCAPTCHA first
-    $recaptcha_response = $_POST['g-recaptcha-response'];
     $recaptcha_verify = verifyRecaptcha($recaptcha_response);
-    
-    if (!$recaptcha_verify->success) {
+    if (!$recaptcha_verify->success || $recaptcha_verify->score < 0.5) {
         echo json_encode([
             'status' => 'error',
-            'message' => 'reCAPTCHA verification failed. Please try again.'
+            'message' => 'Security verification failed. Please try again.'
         ]);
         exit;
     }
