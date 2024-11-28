@@ -122,7 +122,7 @@ $recaptcha_site_key = '6Lc51IwqAAAAAK7k2YV4A5essik6pw5jQvpqbsIi';
         <?php endif; ?>
         <form action="../login.php"  method="POST" id="loginForm">
         <input class="proid" type="hidden" name="proid" id="proid" value="">
-        <div class="g-recaptcha mb-3" data-sitekey="<?php echo $recaptcha_site_key; ?>"></div>
+       
         <div class="mb-3">
             <div class="mb-3">
                 <input type="email"  id="U_USERNAME"  name="U_USERNAME" class="form-control" placeholder="Email account" required>
@@ -133,6 +133,7 @@ $recaptcha_site_key = '6Lc51IwqAAAAAK7k2YV4A5essik6pw5jQvpqbsIi';
                     <i class="fas fa-eye" id="toggleIcon"></i>
                 </span>
             </div>
+            <div class="g-recaptcha mb-3" data-sitekey="<?php echo $recaptcha_site_key; ?>"></div>
             <div class="text-end mb-3">
                 <a href="choose-forgotpass" class="text text-decoration-none">Forgot password?</a>
             </div>
