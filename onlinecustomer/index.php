@@ -127,7 +127,7 @@ if (isset($_SESSION['success_message'])) {
         </div>
         <div class="mb-3">
             <div class="mb-3">
-                <input type="email"  id="U_USERNAME"  name="U_USERNAME" class="form-control" placeholder="Email account" required>
+                <input type="email"  id="U_USERNAME"  name="U_USERNAME" class="form-control" placeholder="Email asccount" required>
             </div>
             <div class="mb-3 password-container">
                 <input type="password" name="U_PASS" class="form-control"  id="U_PASS" placeholder="Password">
