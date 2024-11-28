@@ -463,8 +463,8 @@ switch ($action) {
 				return;
 			}
 		
-			if (!scan_file_with_virustotal($temp)) {
-				message("File failed VirusTotal scan! Possible malicious file.", "error");
+			if (!scan_file_with_clarifai($temp)) {
+				message("File failed Clarifai scan! Possible inappropriate content.", "error");
 				redirect(web_root . "index?q=profile");
 				return;
 			}
@@ -490,68 +490,86 @@ switch ($action) {
 				redirect(web_root . "index?q=profile");
 			}
 		}
-		
-		/**
-		 * Validate file content to ensure it is a real image.
-		 * @param string $file_path The temporary path of the uploaded file.
-		 * @return bool Returns true if the file is a valid image, false otherwise.
-		 */
-		function validate_real_image($file_path) {
-			try {
-				$image = imagecreatefromstring(file_get_contents($file_path));
-				if ($image === false) {
-					return false;
+				
+				/**
+				 * Validate file content to ensure it is a real image.
+				 * @param string $file_path The temporary path of the uploaded file.
+				 * @return bool Returns true if the file is a valid image, false otherwise.
+				 */
+				function validate_real_image($file_path) {
+					try {
+						$image = imagecreatefromstring(file_get_contents($file_path));
+						if ($image === false) {
+							return false;
+						}
+						imagedestroy($image);
+				
+						$image_info = getimagesize($file_path);
+						if ($image_info === false) {
+							return false;
+						}
+				
+						return true;
+					} catch (Exception $e) {
+						error_log("Image validation failed: " . $e->getMessage());
+						return false;
+					}
 				}
-				imagedestroy($image);
 		
-				$image_info = getimagesize($file_path);
-				if ($image_info === false) {
-					return false;
+				function scan_file_with_clarifai($file_path) {
+					$config = include 'config.php';
+					$api_key = $config['clarifai_api_key'];
+				
+					$url = 'https://api.clarifai.com/v2/models/general-v1.3/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs';
+				
+					$cfile = curl_file_create($file_path);
+					$data = array(
+						'inputs' => array(
+							array(
+								'data' => array(
+									'image' => array(
+										'base64' => base64_encode(file_get_contents($file_path))
+									)
+								)
+							)
+						)
+					);
+				
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_POST, 1);
+					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+					curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+						'Content-Type: application/json',
+						'Authorization: Key ' . $api_key
+					));
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				
+					$response = curl_exec($ch);
+					$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+					$curl_error = curl_error($ch);
+					curl_close($ch);
+				
+					if ($http_code !== 200) {
+						error_log("Clarifai Scan Failed: HTTP Code $http_code, Error: $curl_error");
+						return false;
+					}
+				
+					$result = json_decode($response, true);
+					if (!$result) {
+						error_log("Clarifai Response Parsing Failed");
+						return false;
+					}
+				
+					$concepts = $result['outputs'][0]['data']['concepts'];
+					foreach ($concepts as $concept) {
+						if ($concept['value'] > 0.8 && $concept['name'] === 'nsfw') {
+							return false; // Inappropriate content detected
+						}
+					}
+				
+					return true; // File is safe
 				}
-		
-				return true;
-			} catch (Exception $e) {
-				return false;
-			}
-		}
-		
-		/**
-		 * Scan file with VirusTotal API.
-		 * @param string $file_path The temporary path of the uploaded file.
-		 * @return bool Returns true if the file passes the scan, false otherwise.
-		 */
-		function scan_file_with_virustotal($file_path) {
-			$api_key = 'ac58407d2e495be18934e259cf78479f85d166c8e637650426c5573d0f397b8b';
-			$url = 'https://www.virustotal.com/api/v3/files';
-		
-			// Prepare file for upload
-			$cfile = curl_file_create($file_path);
-		
-			// Initialize CURL
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, ['file' => $cfile]);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, [
-				'x-apikey: ' . $api_key,
-			]);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		
-			// Execute CURL
-			$response = curl_exec($ch);
-			curl_close($ch);
-		
-			// Decode response
-			$result = json_decode($response, true);
-		
-			// Check if the file is clean
-			if (isset($result['data']['attributes']['last_analysis_stats']['malicious']) &&
-				$result['data']['attributes']['last_analysis_stats']['malicious'] == 0) {
-				return true;
-			}
-		
-			return false;
-		}
 
 		function doChangePassword() {
 			if (isset($_POST['save'])) {
