@@ -357,17 +357,35 @@ ini_set('display_errors', 1);
             </div>
 
             <div class="terms-check">
-                <input type="checkbox" required id="terms">
-                <label for="terms">I agree to the <a href="javascript:void(0)" onclick="
-    const width = 600;
-    const height = 600;
-    const left = (window.screen.width - width) / 2;
-    const top = (window.screen.height - height) / 2;
-    window.open('../customer/terms.php', 'Terms', 
-        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
-    );
-">Terms and conditions</a></label>
+    <input type="checkbox" required id="terms">
+    <label for="terms">
+        I agree to the 
+        <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#termsModal">
+            Terms and conditions
+        </a>
+    </label>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <div class="modal-body">
+            <?php
+        // Include the terms content dynamically.
+        include '../customer/terms.php';
+        ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
             <button type="submit"  name="submit" class="btn btn-signup">Sign Up</button>
 
