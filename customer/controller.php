@@ -498,31 +498,18 @@ switch ($action) {
 				 */
 				function validate_real_image($file_path) {
 					try {
-						// Check if file is an image using getimagesize()
-						$image_info = @getimagesize($file_path);
+						$image = imagecreatefromstring(file_get_contents($file_path));
+						if ($image === false) {
+							return false;
+						}
+						imagedestroy($image);
+				
+						$image_info = getimagesize($file_path);
 						if ($image_info === false) {
 							return false;
 						}
 				
-						// Try to create an image from the file
-						switch ($image_info[2]) {
-							case IMAGETYPE_JPEG:
-								$image = imagecreatefromjpeg($file_path);
-								break;
-							case IMAGETYPE_PNG:
-								$image = imagecreatefrompng($file_path);
-								break;
-							default:
-								return false;
-						}
-				
-						if (!$image) {
-							return false;
-						}
-				
-						imagedestroy($image);
 						return true;
-				
 					} catch (Exception $e) {
 						error_log("Image validation failed: " . $e->getMessage());
 						return false;
