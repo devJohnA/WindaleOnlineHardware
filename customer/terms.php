@@ -10,7 +10,7 @@
         }
         h2 {
             color: #2c3e50;
-            border-bottom: 2px solid #3498db;
+            border-bottom: 2px solid #fd2323;
             padding-bottom: 10px;
             font-size: 18px;
             font-weight:bold;
@@ -19,7 +19,7 @@
             color: #7f8c8d;
         }
         ul {
-            background-color: #fd2323;
+            background-color: #f9f9f9;
             padding: 15px 30px;
             border-radius: 5px;
         }
