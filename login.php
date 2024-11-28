@@ -142,13 +142,13 @@ if(isset($_POST['sidebarLogin'])){
 
 
 
-define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf');
+define('RECAPTCHA_SECRET_KEY', '6Lcjy34qAAAAAB9taC5YJlHQoWOzO93xScnYI2Lf'); // Your reCAPTCHA v2 Secret Key
 define('MAX_LOGIN_ATTEMPTS', 3);
 define('LOCKOUT_TIME', 15); // Minutes
 
 session_start();
 
-// Function to verify reCAPTCHA response
+// Function to verify reCAPTCHA v2 response
 function verifyRecaptcha($recaptcha_response) {
     $url = 'https://www.google.com/recaptcha/api/siteverify';
     $data = array(
@@ -248,14 +248,13 @@ if(isset($_POST['modalLogin'])) {
     $email = trim($_POST['U_USERNAME']);
     $upass = trim($_POST['U_PASS']);
     $ip_address = $_SERVER['REMOTE_ADDR'];
-    $recaptcha_response = $_POST['recaptcha_response'];
+    $recaptcha_response = $_POST['g-recaptcha-response'];
 
     // Verify reCAPTCHA first
-    $recaptcha_verify = verifyRecaptcha($recaptcha_response);
-    if (!$recaptcha_verify->success || $recaptcha_verify->score < 0.5) {
+    if (!$recaptcha_verify->success) {
         echo json_encode([
             'status' => 'error',
-            'message' => 'Security verification failed. Please try again.'
+            'message' => 'reCAPTCHA verification failed. Please try again.'
         ]);
         exit;
     }
