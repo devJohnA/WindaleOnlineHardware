@@ -157,19 +157,26 @@ function verifyRecaptcha($recaptcha_response) {
         'remoteip' => $_SERVER['REMOTE_ADDR']
     );
 
-    $options = array(
-        'http' => array(
-            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-            'method' => 'POST',
-            'content' => http_build_query($data)
-        )
-    );
+    $curl = curl_init();
+    curl_setopt_array($curl, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query($data)
+    ]);
 
-    $context = stream_context_create($options);
-    $verify = file_get_contents($url, false, $context);
-    $captcha_success = json_decode($verify);
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+    curl_close($curl);
 
-    return $captcha_success;
+    if ($err) {
+        // Log the error
+        error_log("reCAPTCHA verification error: " . $err);
+        return false;
+    }
+
+    $captcha_success = json_decode($response);
+    return $captcha_success->success;
 }
 
 // Function to check for SQL injection in user input
