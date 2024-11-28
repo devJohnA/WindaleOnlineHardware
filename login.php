@@ -259,14 +259,13 @@ if(isset($_POST['modalLogin'])) {
 
     // Verify reCAPTCHA first
     $recaptcha_verify = verifyRecaptcha($recaptcha_response);
-    if (!$recaptcha_verify->success) {
+    if (!$recaptcha_verify) {
         echo json_encode([
             'status' => 'error',
-            'message' => 'Please complete the reCAPTCHA verification.'
+            'message' => 'reCAPTCHA verification failed.'
         ]);
         exit;
     }
-
     // Check for SQL Injection
     if (containsSqlInjection($email) || containsSqlInjection($upass)) {
         logSqlInjectionAttempt($ip_address);
