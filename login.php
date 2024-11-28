@@ -248,14 +248,14 @@ if(isset($_POST['modalLogin'])) {
     $email = trim($_POST['U_USERNAME']);
     $upass = trim($_POST['U_PASS']);
     $ip_address = $_SERVER['REMOTE_ADDR'];
-    $recaptcha_response = $_POST['recaptcha_response'];
+    $recaptcha_response = $_POST['g-recaptcha-response'];
 
     // Verify reCAPTCHA first
     $recaptcha_verify = verifyRecaptcha($recaptcha_response);
-    if (!$recaptcha_verify->success || $recaptcha_verify->score < 0.5) {
+    if (!$recaptcha_verify->success) {
         echo json_encode([
             'status' => 'error',
-            'message' => 'Security verification failed. Please try again.'
+            'message' => 'Please complete the reCAPTCHA verification.'
         ]);
         exit;
     }

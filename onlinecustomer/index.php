@@ -20,7 +20,7 @@ if (isset($_SESSION['success_message'])) {
     unset($_SESSION['success_message']); // Clear the message after displaying
 }
 
-$recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
+$recaptcha_site_key = '6Lcd0IwqAAAAAEGejXX5BeVp8Hpk7zcHBQxbovxU';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +33,7 @@ $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script src="https://www.google.com/recaptcha/api.js?render=<?php echo $recaptcha_site_key; ?>"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
         html, body {
@@ -122,7 +122,7 @@ $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
         <?php endif; ?>
         <form action="../login.php"  method="POST" id="loginForm">
         <input class="proid" type="hidden" name="proid" id="proid" value="">
-        <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
+        <div class="g-recaptcha mb-3" data-sitekey="<?php echo $recaptcha_site_key; ?>"></div>
         <div class="mb-3">
             <div class="mb-3">
                 <input type="email"  id="U_USERNAME"  name="U_USERNAME" class="form-control" placeholder="Email account" required>
@@ -147,22 +147,17 @@ $recaptcha_site_key = '6Lcjy34qAAAAAD0k2NNynCgcbE6_W5Fy9GotDBZA';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Execute reCAPTCHA verification
-        grecaptcha.execute('<?php echo $recaptcha_site_key; ?>', {action: 'login'})
-        .then(function(token) {
-            document.getElementById('recaptchaResponse').value = token;
-            
-            const formData = new FormData(e.target);
-            formData.append('modalLogin', 'true');
-            
-            fetch('../login.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    formData.append('modalLogin', 'true');
+    
+    fetch('../login.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
                 if (data.status === 'success') {
                     Swal.fire({
                         icon: 'success',
