@@ -142,7 +142,7 @@ if(isset($_POST['sidebarLogin'])){
 
 
 
-define('RECAPTCHA_SECRET_KEY', '6Lcd0IwqAAAAAAj-8fCfpmWcb_IHryttABLiQcbH');
+define('RECAPTCHA_SECRET_KEY', '6Lc51IwqAAAAAK_tqlT0cEru-dN-Qa08DtgYlED7');
 define('MAX_LOGIN_ATTEMPTS', 3);
 define('LOCKOUT_TIME', 15); // Minutes
 

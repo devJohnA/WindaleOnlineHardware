@@ -20,7 +20,7 @@ if (isset($_SESSION['success_message'])) {
     unset($_SESSION['success_message']); // Clear the message after displaying
 }
 
-$recaptcha_site_key = '6Lcd0IwqAAAAAEGejXX5BeVp8Hpk7zcHBQxbovxU';
+$recaptcha_site_key = '6Lc51IwqAAAAAK7k2YV4A5essik6pw5jQvpqbsIi';
 ?>
 <!DOCTYPE html>
 <html lang="en">
