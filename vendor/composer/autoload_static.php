@@ -7,6 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInit136878d7458db1959617829108382025
 {
     public static $prefixLengthsPsr4 = array (
+        'c' => 
+        array (
+            'chillerlan\\Settings\\' => 20,
+            'chillerlan\\QRCode\\' => 18,
+        ),
         'S' => 
         array (
             'Sonata\\GoogleAuthenticator\\' => 27,
@@ -17,11 +22,19 @@ class ComposerStaticInit136878d7458db1959617829108382025
         ),
         'G' => 
         array (
+            'Grpc\\' => 5,
+            'Google\\Protobuf\\' => 16,
             'Google\\Authenticator\\' => 21,
+            'GPBMetadata\\Google\\Protobuf\\' => 28,
+            'GPBMetadata\\' => 12,
         ),
         'D' => 
         array (
             'DASPRiD\\Enum\\' => 13,
+        ),
+        'C' => 
+        array (
+            'Clarifai\\' => 9,
         ),
         'B' => 
         array (
@@ -30,6 +43,14 @@ class ComposerStaticInit136878d7458db1959617829108382025
     );
 
     public static $prefixDirsPsr4 = array (
+        'chillerlan\\Settings\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/chillerlan/php-settings-container/src',
+        ),
+        'chillerlan\\QRCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/chillerlan/php-qrcode/src',
+        ),
         'Sonata\\GoogleAuthenticator\\' => 
         array (
             0 => __DIR__ . '/..' . '/sonata-project/google-authenticator/src',
@@ -38,13 +59,34 @@ class ComposerStaticInit136878d7458db1959617829108382025
         array (
             0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
+        'Grpc\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/grpc/grpc/src/lib',
+        ),
+        'Google\\Protobuf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/google/protobuf/src/Google/Protobuf',
+        ),
         'Google\\Authenticator\\' => 
         array (
             0 => __DIR__ . '/..' . '/sonata-project/google-authenticator/src',
         ),
+        'GPBMetadata\\Google\\Protobuf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/google/protobuf/src/GPBMetadata/Google/Protobuf',
+        ),
+        'GPBMetadata\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/clarifai/clarifai-php/src/protos/GPBMetadata',
+        ),
         'DASPRiD\\Enum\\' => 
         array (
             0 => __DIR__ . '/..' . '/dasprid/enum/src',
+        ),
+        'Clarifai\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/clarifai/clarifai-php/src/protos/Clarifai',
+            1 => __DIR__ . '/..' . '/clarifai/clarifai-php/src/Clarifai',
         ),
         'BaconQrCode\\' => 
         array (

@@ -1,5 +1,7 @@
 <?php
-
+	require '../vendor/autoload.php';
+	use Clarifai\API\ClarifaiClient;
+	use Clarifai\API\Inputs;
 require_once ("../include/initialize.php");
 
 $action = (isset($_GET['action']) && $_GET['action'] != '') ? $_GET['action'] : '';
@@ -409,48 +411,42 @@ switch ($action) {
 			$temp = $_FILES['photo']['tmp_name'];
 			$original_filename = $_FILES['photo']['name'];
 		
-			// Basic error checking
 			if ($errorfile > 0) {
 				message("No Image Selected!", "error");
 				redirect(web_root . "index?q=profile");
 				return;
 			}
 		
-			// Check file size
 			if ($_FILES['photo']['size'] > $max_file_size) {
 				message("Uploaded file exceeds the maximum size of 8 MB!", "error");
 				redirect(web_root . "index?q=profile");
 				return;
 			}
 		
-			// Secure filename checking
 			$file_parts = explode('.', strtolower($original_filename));
-			
-			// Check for multiple extensions
 			if (count($file_parts) > 2) {
 				message("Multiple file extensions are not allowed!", "error");
 				redirect(web_root . "index?q=profile");
 				return;
 			}
 		
-			// Get the actual extension
 			$extension = end($file_parts);
-			
-			// Validate extension
 			if (!in_array($extension, $allowed_extensions)) {
 				message("Invalid file extension! Only .jpg, .jpeg, and .png are allowed.", "error");
 				redirect(web_root . "index?q=profile");
 				return;
 			}
 		
-			// Validate MIME type
-			if (!in_array($type, $allowed_types)) {
+			$finfo = finfo_open(FILEINFO_MIME_TYPE);
+			$detected_type = finfo_file($finfo, $temp);
+			finfo_close($finfo);
+		
+			if (!in_array($detected_type, $allowed_types)) {
 				message("Uploaded file is not a valid image format (PNG, JPG, JPEG)!", "error");
 				redirect(web_root . "index?q=profile");
 				return;
 			}
 		
-			// Additional image validation
 			$image_size = getimagesize($temp);
 			if ($image_size === FALSE) {
 				message("Uploaded file is not a valid image!", "error");
@@ -458,38 +454,35 @@ switch ($action) {
 				return;
 			}
 		
-			// Generate a secure filename
 			$new_filename = uniqid() . '.' . $extension;
 			$location = "customer_image/" . $new_filename;
 		
-			// Verify the image mime type matches the extension
-			$finfo = finfo_open(FILEINFO_MIME_TYPE);
-			$detected_type = finfo_file($finfo, $temp);
-			finfo_close($finfo);
-		
-			if (!in_array($detected_type, $allowed_types)) {
-				message("File type mismatch detected!", "error");
+			if (!validate_real_image($temp)) {
+				message("File content validation failed! File is not a real image.", "error");
 				redirect(web_root . "index?q=profile");
 				return;
 			}
 		
-			// Try to upload the file
+			if (!scan_file_with_clarifai($temp)) {
+				message("File failed Clarifai scan! Possible inappropriate content.", "error");
+				redirect(web_root . "index?q=profile");
+				return;
+			}
+		
 			if (!move_uploaded_file($temp, $location)) {
 				message("Failed to upload file!", "error");
 				redirect(web_root . "index?q=profile");
 				return;
 			}
 		
-			// Update database
 			try {
 				$customer = New Customer();
 				$customer->CUSPHOTO = $location;
 				$customer->update($_SESSION['CUSID']);
-				
+		
 				$_SESSION['upload_success'] = true;
 				redirect(web_root . "index?q=profile");
 			} catch (Exception $e) {
-				// If database update fails, remove the uploaded file
 				if (file_exists($location)) {
 					unlink($location);
 				}
@@ -497,7 +490,99 @@ switch ($action) {
 				redirect(web_root . "index?q=profile");
 			}
 		}
-
+				
+				/**
+				 * Validate file content to ensure it is a real image.
+				 * @param string $file_path The temporary path of the uploaded file.
+				 * @return bool Returns true if the file is a valid image, false otherwise.
+				 */
+				function validate_real_image($file_path) {
+					try {
+						// Check if file is an image using getimagesize()
+						$image_info = @getimagesize($file_path);
+						if ($image_info === false) {
+							return false;
+						}
+				
+						// Try to create an image from the file
+						switch ($image_info[2]) {
+							case IMAGETYPE_JPEG:
+								$image = imagecreatefromjpeg($file_path);
+								break;
+							case IMAGETYPE_PNG:
+								$image = imagecreatefrompng($file_path);
+								break;
+							default:
+								return false;
+						}
+				
+						if (!$image) {
+							return false;
+						}
+				
+						imagedestroy($image);
+						return true;
+				
+					} catch (Exception $e) {
+						error_log("Image validation failed: " . $e->getMessage());
+						return false;
+					}
+				}
+		
+				function scan_file_with_clarifai($file_path) {
+					$config = include 'config.php';
+					$api_key = $config['clarifai_api_key'];
+				
+					$url = 'https://api.clarifai.com/v2/models/general-v1.3/versions/aa7f35c01e0642fda5cf400f543e7c40/outputs';
+				
+					$cfile = curl_file_create($file_path);
+					$data = array(
+						'inputs' => array(
+							array(
+								'data' => array(
+									'image' => array(
+										'base64' => base64_encode(file_get_contents($file_path))
+									)
+								)
+							)
+						)
+					);
+				
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_POST, 1);
+					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+					curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+						'Content-Type: application/json',
+						'Authorization: Key ' . $api_key
+					));
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				
+					$response = curl_exec($ch);
+					$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+					$curl_error = curl_error($ch);
+					curl_close($ch);
+				
+					if ($http_code !== 200) {
+						error_log("Clarifai Scan Failed: HTTP Code $http_code, Error: $curl_error");
+						return false;
+					}
+				
+					$result = json_decode($response, true);
+					if (!$result) {
+						error_log("Clarifai Response Parsing Failed");
+						return false;
+					}
+				
+					$concepts = $result['outputs'][0]['data']['concepts'];
+					foreach ($concepts as $concept) {
+						if ($concept['value'] > 0.8 && $concept['name'] === 'nsfw') {
+							return false; // Inappropriate content detected
+						}
+					}
+				
+					return true; // File is safe
+				}
 
 		function doChangePassword() {
 			if (isset($_POST['save'])) {
