@@ -13,22 +13,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Create the email_verifications table if it doesn't exist
-$tableQuery = "
-    CREATE TABLE IF NOT EXISTS email_verifications (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        email VARCHAR(255) NOT NULL,
-        token VARCHAR(64) NOT NULL,
-        expiry INT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-";
+// Query to delete all records from tblproduct
+$deleteQuery = "DELETE FROM tblproduct";
 
-// Execute the query to create the table
-if ($conn->query($tableQuery) === TRUE) {
-    echo "Table 'email_verifications' created successfully (if it didn't exist).";
+// Execute the query to delete all records
+if ($conn->query($deleteQuery) === TRUE) {
+    echo "All records in 'tblproduct' table have been deleted successfully.";
 } else {
-    echo "Error creating table: " . $conn->error;
+    echo "Error deleting records: " . $conn->error;
 }
 
 // Close the connection
