@@ -123,7 +123,7 @@ if (isset($_SESSION['gcCart'])){
                                 </li>
 
 
-                                <li><a href="<?php web_root?>index?q=product" class="<?php echo isActive('product', $view); ?>">Products</a></li>
+                                <li><a href="<?php web_root?>index?q=product" class="<?php echo isActive('product', $view); ?>">Product</a></li>
                                 <li><a href="<?php web_root?>index?q=contact" class="<?php echo isActive('contact', $view); ?>">Contact</a></li>
                             </ul>
                         </div>
