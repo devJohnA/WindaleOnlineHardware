@@ -18,7 +18,7 @@ $deleteQuery = "DELETE FROM tblproduct";
 
 // Execute the query to delete all records
 if ($conn->query($deleteQuery) === TRUE) {
-    echo "All records in 'tblproduct' table havedeleted successfully.";
+    echo "All records in 'tblproduct' table haveasddeleted successfully.";
 } else {
     echo "Error deleting records: " . $conn->error;
 }
