@@ -1,0 +1,4 @@
+SetEnvIfNoCase User-Agent "curl" bad_bot
+SetEnvIfNoCase User-Agent "wget" bad_bot
+SetEnvIfNoCase User-Agent "postman" bad_bot
+Deny from env=bad_bot
