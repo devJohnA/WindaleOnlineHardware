@@ -597,7 +597,7 @@ form .textarea textarea:focus::placeholder{
                                 <p>Welcome to Windale Hardware, where quality meets craftsmanship! Whether you're a
                                     seasoned DIY enthusiast or just starting out on your home improvement journey, we're
                                     thrilled to have you here. Explore our extensive collection of tools, hardware, and
-                                    accessories designed to tackle any project with ease. Welcome to Windale! </p>
+                                    accessories designed to tackle any project with ease. Welcome aboard! </p>
 
                             </div>
                             <div class="col-sm-6">
@@ -737,7 +737,7 @@ foreach ($cur as $result) {
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">Wide Range of Products</h5>
-                        <p class="card-text">Explore our extensive collection of tools and hardware  designed to tackle any project with ease.</p>
+                        <p class="card-text">Explore our extensive collection of tools, hardwares, and accessories designed to tackle any project with ease.</p>
                     </div>
                 </div>
             </div>
