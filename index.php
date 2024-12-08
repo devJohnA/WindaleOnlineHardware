@@ -1,6 +1,6 @@
 <?php
 defined('DS') ? null : define('DS', DIRECTORY_SEPARATOR);
-
+// sd
 // Adjust the path to 'initialize.php' correctly
 require_once(__DIR__ . DS . 'include' . DS . 'initialize.php');
 // if(isset($_SESSION['IDNO'])){
