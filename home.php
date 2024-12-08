@@ -737,7 +737,7 @@ foreach ($cur as $result) {
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">Wide Range of Products</h5>
-                        <p class="card-text">Explore our extensive collection of tools, hardware, and accessories designed to tackle any project with ease.</p>
+                        <p class="card-text">Explore our extensive collection of tools and hardware  designed to tackle any project with ease.</p>
                     </div>
                 </div>
             </div>
