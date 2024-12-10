@@ -608,7 +608,7 @@ form .textarea textarea:focus::placeholder{
                             <div class="col-sm-6">
                                 <h1><span style="color:#fd2323;">Welcome</span></h1>
                                 <h2> Windale Hardware</h2>
-                                <p>Where we offer a wide range of high-quality products
+                                <p>Where we offer a wide range of high-quality product
                                     designed to meet your DIY needs with durability and reliability.</p>
 
                             </div>
@@ -776,7 +776,7 @@ foreach ($cur as $result) {
             <div class="col-sm-7" data-aos="fade-left" data-aos-delay="200">
                 <div class="quote-message">
                     <blockquote>
-                        <p style="text-align:justify;"> Welcome to Windale Hardware, your one-stop shop for all your home improvement needs. With years of experience in the industry, we pride ourselves on offering quality tools, hardware, and expert advice to both professionals and DIY enthusiasts alike.</p>
+                        <p style="text-align:justify;"> Welcome to Windale Hardware Store, your one-stop shop for all your home improvement needs. With years of experience in the industry, we pride ourselves on offering quality tools, hardware, and expert advice to both professionals and DIY enthusiasts alike.</p>
                     </blockquote>
                     <em class="author">- Windale Hardware Team</em>
                 </div>
