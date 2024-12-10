@@ -776,7 +776,7 @@ foreach ($cur as $result) {
             <div class="col-sm-7" data-aos="fade-left" data-aos-delay="200">
                 <div class="quote-message">
                     <blockquote>
-                        <p style="text-align:justify;"> Welcome to Windale Hardware Store, your one-stop shop for all your home improvement needs. With years of experience in the industry, we pride ourselves on offering quality tools, hardware, and expert advice to both professionals and DIY enthusiasts alike.</p>
+                        <p style="text-align:justify;"> Welcome to Windale Hardware Store, your one-stop shop for all your home improvement needs. With years of experience in the industry, we pride ourselves on offering quality tools, hardware, and expert advice to both professionals and DIY enthusiasts a like.</p>
                     </blockquote>
                     <em class="author">- Windale Hardware Team</em>
                 </div>
