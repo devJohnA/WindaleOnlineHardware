@@ -263,7 +263,7 @@
                     <div class="reply-container">
                         <textarea class="form-control bg-body-tertiary" id="message-textarea" rows="1" placeholder="Type a reply..."></textarea>
                         <button style="background:transparent; color:#fd2323;" type="button" class="btn btn-info btn-rounded" id="send-message-btn">
-                            <i class="fas fa-paper-trash"></i>
+                            <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
                 </div>
@@ -452,7 +452,7 @@ function loadChatList() {
                         </div>
                         <div>
                             <span class="delete-icon" data-user-id="${user.id}">
-                                <i class="fas fa-pencil-alt text-danger"></i>
+                                <i class="fas fa-trash-alt text-danger"></i>
                             </span>
                         </div>
                     </div>
