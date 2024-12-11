@@ -109,7 +109,7 @@
                     </form>
 
                     <div class="form-text">
-                        <a href="authenticator.php">Back to Login</a>
+                        <a href="authenticator">Back to Login</a>
                     </div>
 
                     <div class="text-center mt-3">
