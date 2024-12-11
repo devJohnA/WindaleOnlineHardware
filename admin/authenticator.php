@@ -2,10 +2,10 @@
 session_start();
 
 // Prevent direct access to authenticator without email verification
-if (!isset($_SESSION['email_verified']) || $_SESSION['email_verified'] !== true) {
-    header('Location: verification');
-    exit;
-}
+// if (!isset($_SESSION['email_verified']) || $_SESSION['email_verified'] !== true) {
+//     header('Location: verification');
+//     exit;
+// }
 
 // Prevent accessing authenticator if already 2FA verified
 if (isset($_SESSION['2fa_verified']) && $_SESSION['2fa_verified'] === true) {
