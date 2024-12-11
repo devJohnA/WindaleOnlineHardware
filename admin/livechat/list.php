@@ -263,7 +263,7 @@
                     <div class="reply-container">
                         <textarea class="form-control bg-body-tertiary" id="message-textarea" rows="1" placeholder="Type a reply..."></textarea>
                         <button style="background:transparent; color:#fd2323;" type="button" class="btn btn-info btn-rounded" id="send-message-btn">
-                            <i class="fas fa-paper-plane"></i>
+                            <i class="fas fa-paper-trash"></i>
                         </button>
                     </div>
                 </div>
