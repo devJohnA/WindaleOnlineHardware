@@ -101,7 +101,7 @@
                         </div>
 
                         <div class="button text-center">
-                            <button type="submit" class="btn btn-lg btn-gradient-01">
+                            <button type="submit" class="btn btn-lg btn-gradient-04">
                                 Send Recovery Email
                                 <div class="loader" id="loader"></div>
                             </button>
