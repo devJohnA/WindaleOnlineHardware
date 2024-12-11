@@ -103,7 +103,7 @@ if (isset($_SESSION['2fa_verified']) && $_SESSION['2fa_verified'] === true) {
                             </button>
                         </div>
                     </form>
-<!-- sd -->
+
                     <div class="form-text"> 
                         <a href="recovery">Lost access?</a> 
                     </div>
