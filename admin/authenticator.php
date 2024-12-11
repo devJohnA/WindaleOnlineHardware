@@ -59,7 +59,7 @@ if (isset($_SESSION['2fa_verified']) && $_SESSION['2fa_verified'] === true) {
                         <div class="icon"><i class="la la-unlock"></i></div>
                         <img src="../img/Authenticator.png" alt="..." class="img-fluid rounded-circle">
                     </div>
-                    <h3>Authenticator</h3>
+                    <h3>Google Authenticator</h3>
 
                     <!-- Display error or success messages -->
                     <?php if(isset($_SESSION['error'])): ?>
