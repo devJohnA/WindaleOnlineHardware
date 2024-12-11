@@ -97,7 +97,7 @@ if (isset($_SESSION['2fa_verified']) && $_SESSION['2fa_verified'] === true) {
                         </div>
 
                         <div class="button text-center">
-                            <button type="submit" class="btn btn-lg btn-gradient-11">
+                            <button type="submit" class="btn btn-lg btn-gradient-04">
                                 Verify OTP
                                 <div class="loader" id="loader"></div>
                             </button>
