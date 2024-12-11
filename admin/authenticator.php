@@ -57,7 +57,7 @@ if (isset($_SESSION['2fa_verified']) && $_SESSION['2fa_verified'] === true) {
                 <div class="lock-form mx-auto">
                     <div class="photo-profil">
                         <div class="icon"><i class="la la-unlock"></i></div>
-                        <img src="../pagesstyle/assets/img/admin.png" alt="..." class="img-fluid rounded-circle">
+                        <img src="../img/Authenticator.png" alt="..." class="img-fluid rounded-circle">
                     </div>
                     <h3>Authenticator</h3>
 
