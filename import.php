@@ -1,6 +1,6 @@
 <?php
 
-$servername = "127.0.0.1";
+$servername = "localhost";
 $username = "u510162695_bantayanisland";
 $password = "1Bantayan"; 
 $dbname = "u510162695_bantayanisland"; 
@@ -21,7 +21,7 @@ if (isset($_POST['import'])) {
         // Split the file into individual SQL statements
         $queries = explode(';', $fileContent);
         $success = true;
-// asd
+
         // Execute each SQL statement
         foreach ($queries as $query) {
             $trimmedQuery = trim($query);
