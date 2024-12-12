@@ -21,7 +21,7 @@ if (isset($_POST['import'])) {
         // Split the file into individual SQL statements
         $queries = explode(';', $fileContent);
         $success = true;
-
+// asd
         // Execute each SQL statement
         foreach ($queries as $query) {
             $trimmedQuery = trim($query);
