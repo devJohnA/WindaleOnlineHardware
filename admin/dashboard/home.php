@@ -219,6 +219,14 @@ mysqli_close($conn);
 
 </style>
 <div class="row g-4 mb-4">
+<div class="col-6 col-lg-3">
+        <div class="app-card app-card-stat shadow-sm h-100">
+            <div class="app-card-body p-3 p-lg-4">
+                <h4 class="stats-type mb-1"> <img src="../../images/gcash.png" height="70" width="120"></h4>
+                <div class="stats-figure">₱<?php echo number_format($gcashTotal, 2); ?></div>
+            </div>
+        </div>
+    </div>
     <div class="col-6 col-lg-3">
         <div class="app-card app-card-stat shadow-sm h-100">
             <div class="app-card-body p-3 p-lg-4">
@@ -252,7 +260,7 @@ mysqli_close($conn);
     <div class="col-6 col-lg-3">
         <div class="app-card app-card-stat shadow-sm h-100">
             <div class="app-card-body p-3 p-lg-4">
-                <h4 class="stats-type mb-1"> <i class="fas fa-boxes mr-2" style="color: #4e73df;">></i> Total Stock Items</h4>
+                <h4 class="stats-type mb-1"> <i class="fas fa-boxes mr-2" style="color: #4e73df;"></i> Total Stock Items</h4>
                 <div class="stats-figure"><?php echo $product; ?></div>
             </div>
 
@@ -285,7 +293,7 @@ mysqli_close($conn);
     <div class="col-6 col-lg-3">
         <div class="app-card app-card-stat shadow-sm h-100">
             <div class="app-card-body p-3 p-lg-4">
-                <h4 class="stats-type mb-1"> <i class="fas fa-store mr-2" style="color: #1cc88a;"></i> In-Store Revenue</h4>
+                <h4 class="stats-type mb-1"> <i class="fas fa-store mr-2" style="color: #4e73df;"></i> In-Store Revenue</h4>
                 <div class="stats-figure"> <?php echo number_format($totalRevenue, 2); ?></div>
             </div>
         </div>
@@ -294,7 +302,7 @@ mysqli_close($conn);
     <div class="col-6 col-lg-3">
         <div class="app-card app-card-stat shadow-sm h-100">
             <div class="app-card-body p-3 p-lg-4">
-                <h4 class="stats-type mb-1"> <i class="fas fa-shopping-cart mr-2" style="color: #36b9cc;"></i> Online Sales Revenue</h4>
+                <h4 class="stats-type mb-1"> <i class="fas fa-shopping-cart mr-2" style="color: #4e73df;"></i> Online Sales Revenue</h4>
                 <div class="stats-figure"><?php echo number_format($totalRevenueOnline, 2); ?></div>
             </div>
         </div>
@@ -303,7 +311,7 @@ mysqli_close($conn);
     <div class="col-6 col-lg-3">
         <div class="app-card app-card-stat shadow-sm h-100">
             <div class="app-card-body p-3 p-lg-4">
-                <h4 class="stats-type mb-1"><i class="fas fa-clock mr-2"  style="color: #f6c23e;"></i> Pending</h4>
+                <h4 class="stats-type mb-1"><i class="fas fa-clock mr-2"  style="color: #4e73df;"></i> Pending</h4>
                 <div class="stats-figure"><?php echo $statusCounts['pending_count']; ?></div>
             </div>
         </div>
@@ -312,7 +320,7 @@ mysqli_close($conn);
     <div class="col-6 col-lg-3">
         <div class="app-card app-card-stat shadow-sm h-100">
             <div class="app-card-body p-3 p-lg-4">
-                <h4 class="stats-type mb-1"><i class="fas fa-box-open mr-2"  style="color: #e74a3b;"></i> Preparing for Delivery</h4>
+                <h4 class="stats-type mb-1"><i class="fas fa-box-open mr-2"  style="color: #4e73df;"></i> Preparing for Delivery</h4>
                 <div class="stats-figure"><?php echo $statusCounts['preparing_count']; ?></div>
             </div>
         </div>
@@ -321,20 +329,13 @@ mysqli_close($conn);
     <div class="col-6 col-lg-3">
         <div class="app-card app-card-stat shadow-sm h-100">
             <div class="app-card-body p-3 p-lg-4">
-                <h4 class="stats-type mb-1"><i class="fas fa-truck mr-2" style="color: #5a5c69;"></i> Approaching Destination</h4>
+                <h4 class="stats-type mb-1"><i class="fas fa-truck mr-2" style="color: #4e73df;"></i> Approaching Destination</h4>
                 <div class="stats-figure"><?php echo $statusCounts['approaching_count']; ?></div>
             </div>
         </div>
     </div>
 
-    <div class="col-6 col-lg-3">
-        <div class="app-card app-card-stat shadow-sm h-100">
-            <div class="app-card-body p-3 p-lg-4">
-                <h4 class="stats-type mb-1"> <img src="../../images/gcash.png" height="70" width="120"></h4>
-                <div class="stats-figure">₱<?php echo number_format($gcashTotal, 2); ?></div>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 
