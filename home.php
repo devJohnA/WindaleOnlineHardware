@@ -783,13 +783,13 @@ foreach ($cur as $result) {
     
     // Display stars
     for ($i = 1; $i <= $full_stars; $i++) {
-        echo '<span class="fa fa-star"></span>';
+        echo '<span class="fa fa-star" style="color: #fd2323;"></span>';
     }
     if ($half_star) {
-        echo '<span class="fa fa-star-half-alt"></span>';
+        echo '<span class="fa fa-star-half-alt" style="color: #fd2323;"></span>';
     }
     for ($i = 1; $i <= $empty_stars; $i++) {
-        echo '<span class="far fa-star"></span>';
+        echo '<span class="far fa-star" style="color: #fd2323;"></span>';
     }
     
     // Format display with proper handling of NULL/zero cases
