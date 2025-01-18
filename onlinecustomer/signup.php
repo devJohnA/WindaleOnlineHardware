@@ -91,7 +91,7 @@ ini_set('display_errors', 1);
                         $mail->Host       = 'smtp.gmail.com';
                         $mail->SMTPAuth   = true;
                         $mail->Username   = 'delacruzjohnanthon@gmail.com';
-                        $mail->Password   = 'dwuptejylfdfbbue';
+                        $mail->Password   = 'dglsqwwcqaqwwpf';
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                         $mail->Port       = 465;
 
